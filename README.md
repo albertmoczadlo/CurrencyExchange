@@ -30,6 +30,9 @@ Aplikacja została stworzona w oparciu o technologie:
 - ASP.NET Core
 - Entity Framework
 - Razor
+- Bootstrap
+- Html
+- CSS
 
 ## Autor
 
