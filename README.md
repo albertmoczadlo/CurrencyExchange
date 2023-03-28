@@ -31,7 +31,7 @@ Aplikacja została stworzona w oparciu o technologie:
 - Entity Framework
 - Razor
 
-## Instalacja
+## Autor
 
-Aby uruchomić aplikację, należy sklonować repozytorium, a następnie w katalogu głównym aplikacji wykonać polecenie:
+Aplikacja została stworzona przez Katarzyna Rogowska, Mirosław Pizun, Albert Moczadło.
 
