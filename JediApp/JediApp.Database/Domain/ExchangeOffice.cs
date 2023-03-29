@@ -15,14 +15,10 @@ namespace JediApp.Database.Domain
 
         public string Name { get; set; }
         public string Address { get; set; }
-        public int Markup { get; set; } //marża, narzut
-
+        public int Markup { get; set; }
         public Guid Id { get; set; }
-        //public string? UserId { get; set; }
-        
 
         public ExchangeOfficeBoard ExchangeOfficeBoard { get; set; }
-        //public User User { get; set; }
         public ICollection<MoneyOnStock> MoneyOnStocks { get; set; }
     }
 }

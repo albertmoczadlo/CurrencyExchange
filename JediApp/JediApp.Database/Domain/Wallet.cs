@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JediApp.Database.Domain
 {
-    public class Wallet 
+    public class Wallet
     {
         public Wallet()
         {
@@ -16,8 +16,6 @@ namespace JediApp.Database.Domain
         public string UserId { get; set; }
 
         public User User { get; set; }
-        public ICollection<WalletPosition> WalletPositions { get; set; } 
-        
+        public ICollection<WalletPosition> WalletPositions { get; set; }
     }
-   
 }

@@ -2,7 +2,7 @@
 
 namespace JediApp.Database.Domain
 {
-    public class TransactionHistory 
+    public class TransactionHistory
     {
         public TransactionHistory()
         {
