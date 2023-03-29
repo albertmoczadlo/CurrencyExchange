@@ -1,5 +1,4 @@
 using JediApp.Database.Repositories;
-using JediApp.Services.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using JediApp.Web.Areas.Identity.Data;
@@ -10,6 +9,8 @@ using JediApp.Database.Interface;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Configuration;
 using JediApp.Infrastructure.Repositories;
+using JediApp.Services.Services.Interfaces;
+using JediApp.Services.Services.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<JediAppDbContext>(options =>

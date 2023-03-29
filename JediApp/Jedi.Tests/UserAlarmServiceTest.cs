@@ -1,6 +1,7 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
 using JediApp.Services.Services;
+using JediApp.Services.Services.Service;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Moq;
 using Xunit;

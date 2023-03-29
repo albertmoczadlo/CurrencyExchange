@@ -1,7 +1,7 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
 using JediApp.Database.Repositories;
-using JediApp.Services.Services;
+using JediApp.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,20 +21,12 @@ namespace JediApp.Web.Controllers
             _exchangeOfficeService = exchangeOfficeService;
             _userAlarmService = userAlarmService;
         }
-
-        //public ExchangeOfficeBoardController()
-        //{
-        //    _exchangeOfficeBoardService = new ExchangeOfficeBoardService(new ExchangeOfficeBoardRepository());
-        //}
-
-        // GET: ExchangeOfficeBoardController
         public ActionResult Index()
         {
             ViewData["activePage"] = "AdminExchange";
 
             var model = _exchangeOfficeBoardService.GetAllCurrencies();
 
-            //remove-hide pln from the board
             var pln = model.Where(m => m.ShortName.ToLower().Equals("pln")).FirstOrDefault();
             if (pln != null)
             {
@@ -44,20 +36,17 @@ namespace JediApp.Web.Controllers
             return View(model);
         }
 
-        // GET: ExchangeOfficeBoardController/Details/5
         public ActionResult Details(Guid id)
         {
             var currency = _exchangeOfficeBoardService.GetCurrencyById(id);
             return View(currency);
         }
 
-        // GET: ExchangeOfficeBoardController/Create
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: ExchangeOfficeBoardController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(Currency newCurrency)
@@ -82,7 +71,6 @@ namespace JediApp.Web.Controllers
             }
         }
 
-        // GET: ExchangeOfficeBoardController/Edit/5
         public ActionResult Edit(Guid id)
         {
             var currency = _exchangeOfficeBoardService.GetCurrencyById(id);
@@ -94,25 +82,12 @@ namespace JediApp.Web.Controllers
             {
                 return RedirectToAction(nameof(Index));
             }
-
-            //return View();
         }
 
-        //// POST: ExchangeOfficeBoardController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //public ActionResult Edit(int id, IFormCollection collection)
         public ActionResult Edit(Guid id, Currency currency)
         {
-            //try
-            //{
-            //    return RedirectToAction(nameof(Index));
-            //}
-            //catch
-            //{
-            //    return View();
-            //}
-
             _exchangeOfficeBoardService.UpdateCurrency(id, currency);
 
             return RedirectToAction(nameof(Index));
@@ -133,7 +108,6 @@ namespace JediApp.Web.Controllers
             }
         }
 
-        //// GET: ExchangeOfficeBoardController/Delete/5
         public ActionResult Delete(Guid id)
         {
             var currency = _exchangeOfficeBoardService.GetCurrencyById(id);
@@ -141,7 +115,6 @@ namespace JediApp.Web.Controllers
             return View(currency);
         }
 
-        // POST: ExchangeOfficeBoardController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(Guid id, IFormCollection collection)
@@ -159,7 +132,6 @@ namespace JediApp.Web.Controllers
             }
         }
 
-        // POST: ExchangeOfficeBoardController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AddCurrencyFromNbpApi()
@@ -180,11 +152,8 @@ namespace JediApp.Web.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-
-            
         }
 
-        // POST: ExchangeOfficeBoardController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdateCurrencyRatesFromNbpApi()
@@ -216,8 +185,6 @@ namespace JediApp.Web.Controllers
 
             }
 
-            // Execute User Alarm
-
             _userAlarmService.ExecuteAlarms(currencies);
 
             return RedirectToAction(nameof(Index));
@@ -232,21 +199,16 @@ namespace JediApp.Web.Controllers
 
             foreach (var currency in currencies)
             {
-                
+
                 var markup = _exchangeOfficeService.GetAllExchangeOffices().FirstOrDefault().Markup;
-                //spread 5%
-                //currency.BuyAt *= (decimal)1.025;
-                //currency.SellAt *= (decimal)0.975;                
                 currency.BuyAt *= 1 + (decimal)markup / 200;
                 currency.SellAt *= 1 - (decimal)markup / 200;
                 _exchangeOfficeBoardService.UpdateCurrency(currency.Id, currency);
-               
+
             }
 
             return RedirectToAction(nameof(Index));
-
-
         }
-        
+
     }
 }

@@ -1,10 +1,8 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.DotNet.Scaffolding.Shared.Messaging;
-using Microsoft.Extensions.DependencyInjection;
+using JediApp.Services.Services.Interfaces;
 
-namespace JediApp.Services.Services
+namespace JediApp.Services.Services.Service
 {
     public class UserService : IUserService
     {

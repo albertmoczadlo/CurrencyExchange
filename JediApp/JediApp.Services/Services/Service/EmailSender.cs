@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Mail;
 
-namespace JediApp.Services.Services
+namespace JediApp.Services.Services.Service
 {
     public class EmailSender : IEmailSender
     {

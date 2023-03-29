@@ -1,8 +1,9 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
 using JediApp.Services.Helpers;
+using JediApp.Services.Services.Interfaces;
 
-namespace JediApp.Services.Services
+namespace JediApp.Services.Services.Service
 {
     public class MenuRoleAdminService
     {
@@ -34,7 +35,7 @@ namespace JediApp.Services.Services
         //        {
         //            Console.WriteLine($"Id: {user.Id} Login: {user.Login} Password: {user.Password} Role: {user.Role}");
         //        }
-                
+
         //    }
         //    else
         //    {
@@ -82,7 +83,7 @@ namespace JediApp.Services.Services
         {
             Console.WriteLine("Enter shortname of currency you want to delete (x = abort):");
             var shortName = MenuOptionsHelper.CheckString(Console.ReadLine());
-            if(!shortName.Equals("x"))
+            if (!shortName.Equals("x"))
             {
                 var status = _exchangeOfficeBoardSevice.DeleteCurrencyByShortName(shortName);
                 if (status)
@@ -156,15 +157,15 @@ namespace JediApp.Services.Services
             decimal sell = 0;
             while (true)
             {
-                
+
                 foreach (var cur in listCurrients)
                 {
                     Console.WriteLine($"{cur.ShortName} | {cur.BuyAt} | {cur.SellAt}");
                 }
-                
+
                 Console.Write("\nEnter short name:");
-                var option = Helpers.MenuOptionsHelper.CheckString(Console.ReadLine().ToUpper());
-                
+                var option = MenuOptionsHelper.CheckString(Console.ReadLine().ToUpper());
+
 
                 var resultShort = listCurrients.FirstOrDefault(x => x.ShortName == option);
 
@@ -181,7 +182,7 @@ namespace JediApp.Services.Services
                 }
 
                 Console.Write("Enter amount the exchange: ");
-                var valuePln = Helpers.MenuOptionsHelper.CheckDecimal(Console.ReadLine());
+                var valuePln = MenuOptionsHelper.CheckDecimal(Console.ReadLine());
 
                 var result = valuePln / sell;
 
@@ -191,7 +192,7 @@ namespace JediApp.Services.Services
                 if (Console.ReadLine() == "x")
                     break;
             }
-            
+
             return false;
         }
 

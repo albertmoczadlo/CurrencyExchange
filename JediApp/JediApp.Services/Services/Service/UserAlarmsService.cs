@@ -1,8 +1,9 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
+using JediApp.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace JediApp.Services.Services
+namespace JediApp.Services.Services.Service
 {
     public class UserAlarmsService : IUserAlarmsService
     {

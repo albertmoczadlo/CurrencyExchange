@@ -1,8 +1,8 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
-using System.Security.Claims;
+using JediApp.Services.Services.Interfaces;
 
-namespace JediApp.Services.Services
+namespace JediApp.Services.Services.Service
 {
     public class UserWalletService : IUserWalletService
     {
@@ -40,11 +40,5 @@ namespace JediApp.Services.Services
         {
             _userWalletRepository.Deposit(userId, currencyCode, depositAmount, description);
         }
-
-      
-
-
-
-
     }
 }

@@ -1,4 +1,4 @@
-﻿using JediApp.Services.Services;
+﻿using JediApp.Services.Services.Interfaces;
 using JediApp.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;

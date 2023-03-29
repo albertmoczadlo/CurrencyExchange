@@ -1,7 +1,7 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
 using JediApp.Database.Repositories;
-using JediApp.Services.Services;
+using JediApp.Services.Services.Interfaces;
 using JediApp.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,12 +28,6 @@ namespace JediApp.Web.Controllers
             _availableMoneyOnStockRepository = availableMoneyOnStockRepository;
         }
 
-        //public ExchangeOfficeBoardController()
-        //{
-        //    _exchangeOfficeBoardService = new ExchangeOfficeBoardService(new ExchangeOfficeBoardRepository());
-        //}
-
-        // GET: ExchangeOfficeBoardController
         public ActionResult Index()
         {
             ViewData["activePage"] = "UserExchangeOfficeBoard";
@@ -50,14 +44,12 @@ namespace JediApp.Web.Controllers
             return View(model);
         }
 
-        // GET: ExchangeOfficeBoardController/Details/5
         public ActionResult Details(Guid id)
         {
             var currency = _exchangeOfficeBoardService.GetCurrencyById(id);
             return View(currency);
         }
 
-        // GET: ExchangeOfficeBoardController/Edit/5
         public ActionResult Buy(Guid id)
         {
 
@@ -81,20 +73,15 @@ namespace JediApp.Web.Controllers
                 };
 
                 return View(userExchange);
-                //return View(currency);
             }
             else
             {
                 return RedirectToAction(nameof(Index));
             }
-
-            //return View();
         }
 
-        //// POST: ExchangeOfficeBoardController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //public ActionResult Edit(int id, IFormCollection collection)
         public ActionResult Buy(UserExchange userExchange)
         {
 
@@ -122,9 +109,9 @@ namespace JediApp.Web.Controllers
                 _userWalletService.Withdrawal(userId, userExchange.ExchangeFromCurrency, userExchange.ExchangeToCurrencyAmount * userExchange.BuyAt, "Buy");
                 _userWalletService.Deposit(userId, userExchange.ExchangeToCurrency, userExchange.ExchangeToCurrencyAmount, "Buy");
 
-                //var newBalance = GetCurrencyBalance(userWithdrawal.Currency);
                 var exchangeFromCurrency = _exchangeOfficeBoardService.GetAllCurrencies().Where(c => (c.ShortName.ToLower()).Equals(userExchange.ExchangeFromCurrency.ToLower())).FirstOrDefault();
                 var newBalance = _userWalletService.GetCurrencyBalanceById(userId, exchangeFromCurrency.Id).CurrencyAmount;
+
                 ViewData["currentSaldo"] = newBalance;
                 ViewData["currenncy"] = userExchange.ExchangeFromCurrency;
                 ViewData["activePage"] = "UserBuy";
@@ -135,15 +122,11 @@ namespace JediApp.Web.Controllers
 
         }
 
-        // GET: ExchangeOfficeBoardController/Edit/5
         public ActionResult Sell(Guid id)
         {
-
-            //var currency = _exchangeOfficeBoardService.GetCurrencyById(id);
             var currency = _exchangeOfficeBoardService.GetAllCurrencies().Where(c => (c.ShortName.ToLower()).Equals("pln")).FirstOrDefault();
             var exchangeFromCurrency = _exchangeOfficeBoardService.GetCurrencyById(id);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            //var exchangeFromCurrencyAmount = _userWalletService.GetCurrencyBalanceById(userId, exchangeFromCurrency.Id).CurrencyAmount;
             var exchangeFromCurrencyAmount = _userWalletService.GetCurrencyBalanceById(userId, id).CurrencyAmount;
 
             if (currency != null)
@@ -160,22 +143,16 @@ namespace JediApp.Web.Controllers
 
                 };
 
-
                 return View(userExchange);
-                //return View(currency);
             }
             else
             {
                 return RedirectToAction(nameof(Index));
             }
-
-            //return View();
         }
 
-        //// POST: ExchangeOfficeBoardController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //public ActionResult Edit(int id, IFormCollection collection)
         public ActionResult Sell(UserExchange userExchange)
         {
 

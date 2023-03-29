@@ -1,11 +1,11 @@
 ﻿using iText.Html2pdf;
-using JediApp.Services.Services;
 using JediApp.Web.Areas.Identity.Data;
 using JediApp.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using JediApp.Database.Domain;
 using Microsoft.AspNetCore.SignalR;
 using System.Drawing;
+using JediApp.Services.Services.Interfaces;
 
 namespace JediApp.Web.Controllers
 {
@@ -25,9 +25,6 @@ namespace JediApp.Web.Controllers
 
             var allUsersHistories = _transactionHistoryService.GetAllUsersHistories();
             AdminReport model = new AdminReport();
-            //model.AnnualTurnover = allUsersHistories.Where(x => x.DateOfTransaction.Year == DateTime.Now.Year).Sum(x => x.Amount);
-            //model.MonthlyTurnover = allUsersHistories.Where(x => x.DateOfTransaction.Month == DateTime.Now.Year).Sum(x => x.Amount);
-            //model.DailyTurnover = allUsersHistories.Where(x => x.DateOfTransaction.Day == DateTime.Now.Year).Sum(x => x.Amount);
 
             model.TurnoverPLN = allUsersHistories.Where(x => x.CurrencyName == "PLN").Sum(x => x.Amount);
             model.TurnoverEUR = allUsersHistories.Where(x => x.CurrencyName == "EUR").Sum(x => x.Amount);
@@ -53,7 +50,6 @@ namespace JediApp.Web.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult GetPDF(string GridHtml)
         {
-
             using (MemoryStream stream = new MemoryStream())
             {
                 HtmlConverter.ConvertToPdf(GridHtml, stream);
@@ -61,8 +57,6 @@ namespace JediApp.Web.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-
-
         }
     }
 }

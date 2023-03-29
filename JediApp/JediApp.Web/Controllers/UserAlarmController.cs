@@ -1,5 +1,5 @@
 ﻿using JediApp.Database.Interface;
-using JediApp.Services.Services;
+using JediApp.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using UserAlarm = JediApp.Database.Domain.UserAlarm;

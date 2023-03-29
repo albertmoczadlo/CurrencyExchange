@@ -1,7 +1,8 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
+using JediApp.Services.Services.Interfaces;
 
-namespace JediApp.Services.Services
+namespace JediApp.Services.Services.Service
 {
     public class ExchangeOfficeService : IExchangeOfficeService
     {
@@ -32,6 +33,6 @@ namespace JediApp.Services.Services
             }
             return _exchangeOfficeRepository.UpdateExchangeOffice(id, exchangeOfficeToEdit);
         }
- 
+
     }
 }

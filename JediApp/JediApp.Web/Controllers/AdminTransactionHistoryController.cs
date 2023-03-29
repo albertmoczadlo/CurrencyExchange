@@ -1,5 +1,5 @@
 ﻿using iText.Html2pdf;
-using JediApp.Services.Services;
+using JediApp.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -35,8 +35,6 @@ namespace JediApp.Web.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-
-
         }
     }
 }

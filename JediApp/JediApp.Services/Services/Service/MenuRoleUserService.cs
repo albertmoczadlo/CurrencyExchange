@@ -2,8 +2,9 @@
 using JediApp.Database.Interface;
 
 using JediApp.Services.Helpers;
+using JediApp.Services.Services.Interfaces;
 
-namespace JediApp.Services.Services
+namespace JediApp.Services.Services.Service
 {
     public class MenuRoleUserService
     {
@@ -118,7 +119,7 @@ namespace JediApp.Services.Services
 
         //    decimal amountInput;
         //    Currency exchangeToCurrency = null;
-            
+
         //    if (selectedCurrencyName == "PLN")
         //    {
         //        Console.WriteLine("Select currency to exchange to");
@@ -173,7 +174,7 @@ namespace JediApp.Services.Services
         //        Console.WriteLine($"Depositing {newCurrencyAmount} of {exchangeToCurrency.ShortName}");
         //        _userWalletRepository.Deposit(user.Wallet.Id, user.Login, exchangeToCurrency.ShortName, newCurrencyAmount);
         //    }
-            
+
         //}
 
         //public void Withdrawal(User user)

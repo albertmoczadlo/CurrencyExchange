@@ -1,7 +1,5 @@
 ﻿using JediApp.Database.Domain;
-using JediApp.Database.Repositories;
-using JediApp.Services.Services;
-using Microsoft.AspNetCore.Http;
+using JediApp.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JediApp.Web.Controllers
@@ -14,13 +12,6 @@ namespace JediApp.Web.Controllers
         {
             _exchangeOfficeService = exchangeOfficeService;
         }
-
-        //public ExchangeOfficeBoardController()
-        //{
-        //    _exchangeOfficeBoardService = new ExchangeOfficeBoardService(new ExchangeOfficeBoardRepository());
-        //}
-
-        // GET: ExchangeOfficeBoardController
         public ActionResult Index()
         {
             ViewData["activePage"] = "AdminExchangeOfficeSettings";
@@ -30,14 +21,12 @@ namespace JediApp.Web.Controllers
             return View(model);
         }
 
-        // GET: ExchangeOfficeBoardController/Details/5
         public ActionResult Details(Guid id)
         {
             var exchangeOffice = _exchangeOfficeService.GetExchangeOfficeById(id);
             return View(exchangeOffice);
         }
 
-        // GET: ExchangeOfficeBoardController/Edit/5
         public ActionResult Edit(Guid id)
         {
             var exchangeOffice = _exchangeOfficeService.GetExchangeOfficeById(id);
@@ -49,25 +38,12 @@ namespace JediApp.Web.Controllers
             {
                 return RedirectToAction(nameof(Index));
             }
-
-            //return View();
         }
 
-        //// POST: ExchangeOfficeBoardController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //public ActionResult Edit(int id, IFormCollection collection)
         public ActionResult Edit(Guid id, ExchangeOffice exchangeOffice)
         {
-            //try
-            //{
-            //    return RedirectToAction(nameof(Index));
-            //}
-            //catch
-            //{
-            //    return View();
-            //}
-
             _exchangeOfficeService.UpdateExchangeOffice(id, exchangeOffice);
 
             return RedirectToAction(nameof(Index));
@@ -86,7 +62,6 @@ namespace JediApp.Web.Controllers
             {
                 return View();
             }
-        }        
-        
+        }
     }
 }

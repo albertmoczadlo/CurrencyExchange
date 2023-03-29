@@ -1,8 +1,8 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
+using JediApp.Services.Services.Interfaces;
 
-
-namespace JediApp.Services.Services
+namespace JediApp.Services.Services.Service
 {
     public class ExchangeOfficeBoardService : IExchangeOfficeBoardService
     {

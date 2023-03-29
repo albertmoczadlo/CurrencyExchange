@@ -1,7 +1,8 @@
 ﻿using JediApp.Database.Domain;
 using JediApp.Database.Interface;
+using JediApp.Services.Services.Interfaces;
 
-namespace JediApp.Services.Services
+namespace JediApp.Services.Services.Service
 {
     public class NbpJsonService : INbpJsonService
     {
@@ -15,8 +16,8 @@ namespace JediApp.Services.Services
         public List<Currency> GetAllCurrencies()
         {
             return _nbpJsonRepository.GetAllCurrencies();
-        }       
-        
+        }
+
         public NBPJsonRoot GetNBPJsonTableInfo()
         {
             return _nbpJsonRepository.GetNBPJsonTableInfo();

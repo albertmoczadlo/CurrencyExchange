@@ -2,6 +2,7 @@
 using JediApp.Database.Interface;
 using JediApp.Database.Repositories;
 using JediApp.Services.Services;
+using JediApp.Services.Services.Service;
 using Moq;
 using System;
 using System.Collections.Generic;

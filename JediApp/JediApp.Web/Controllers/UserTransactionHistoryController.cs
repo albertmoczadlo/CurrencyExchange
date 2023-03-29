@@ -1,6 +1,6 @@
 ﻿using iText.Html2pdf;
 using JediApp.Database.Domain;
-using JediApp.Services.Services;
+using JediApp.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
