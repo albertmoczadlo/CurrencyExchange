@@ -36,7 +36,7 @@
                 else
                 {
                     Console.WriteLine("Wrong option");
-                }    
+                }
             }
         }
 

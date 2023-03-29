@@ -30,7 +30,6 @@ namespace JediApp.Database.Repositories
                 walletCurrency = null;
             }
 
-            // Update or add wallet currency
             if (walletCurrency != null)
             {
                 walletCurrency.CurrencyAmount = walletCurrency.CurrencyAmount + depositAmount;
@@ -62,9 +61,6 @@ namespace JediApp.Database.Repositories
             {
                 _jediAppDb.Add(transactionHistory);
             }
-           
-
-           
 
             _jediAppDb.SaveChanges();
         }
@@ -97,7 +93,6 @@ namespace JediApp.Database.Repositories
             }
 
             walletCurrency.CurrencyAmount = walletCurrency.CurrencyAmount - withdrawalAmount;
-            
             _jediAppDb.Update(walletCurrency);
 
             var transactionHistory = new TransactionHistory
@@ -117,102 +112,5 @@ namespace JediApp.Database.Repositories
 
             _jediAppDb.SaveChanges();
         }
-
-        //        var userWalletIdFromFile = columns[0];
-        //        if (userWalletIdFromFile.Equals(userWalletId, StringComparison.InvariantCultureIgnoreCase))
-        //            userWallet.WalletStatus.Add(new WalletPosition(columns[0]) { Currency = new Currency() { ShortName = columns[2] }, CurrencyAmount = decimal.Parse(columns[3]), UserName = columns[1] });
-        //    }
-
-        //    return userWallet;
-        //}
-
-        //public void Deposit(Guid walletId, string userName, string currencyCode, decimal depositAmount)
-        //{
-        //    RecalculateUserWalletRepository(walletId, userName, currencyCode, depositAmount, true);
-        //}
-
-        //public void Withdrawal(Guid walletId, string userName, string currencyCode, decimal withdrawalAmount)
-        //{
-        //    RecalculateUserWalletRepository(walletId, userName, currencyCode, withdrawalAmount, false);
-        //}
-
-        //public List<Wallet> GetAllWallets()
-        //{
-        //    var wallets = new List<Wallet>();
-
-        //    if (!File.Exists(_fileNameWallet))
-        //        return wallets;
-
-        //    var walletPositionsFromFile = File.ReadAllLines(_fileNameWallet);
-        //    var walletPositions = new List<WalletPosition>();
-
-        //    foreach (var line in walletPositionsFromFile)
-        //    {
-        //        string[] columns = line.Split(";");
-        //        walletPositions.Add(new WalletPosition(columns[0]) { Currency = new Currency() { ShortName = columns[2] }, CurrencyAmount = decimal.Parse(columns[3]), UserName = columns[1] });
-        //    }
-
-        //    var grouppedWalPos = walletPositions.GroupBy(a => a.WalletId);
-        //    foreach (var group in grouppedWalPos)
-        //    {
-        //        wallets.Add(new Wallet(group.Key.ToString()) { WalletStatus = group.ToList() });
-        //    }
-
-        //    return wallets;
-        //}
-
-        //private void RecalculateUserWalletRepository(Guid walletId, string userName, string currencyCode, decimal amount, bool isDeposit)
-        //{
-        //    var allWalletsExceptUser = GetAllWallets().Where(a => a.Id != walletId);
-        //    var userWallet = GetWallet(walletId);
-
-        //    if (File.Exists(_fileNameWallet))
-        //        File.Delete(_fileNameWallet);
-
-        //    var userCurrency = userWallet.WalletStatus.Where(w => w.Currency.ShortName.Equals(currencyCode)).SingleOrDefault();
-        //    if (userCurrency != null)
-        //    {
-        //        if (isDeposit)
-        //        {
-        //            userCurrency.CurrencyAmount += amount;
-        //        }
-        //        else
-        //        {
-        //            userCurrency.CurrencyAmount -= amount;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        userWallet.WalletStatus.Add(new WalletPosition
-        //        {
-        //            Currency = new Currency
-        //            {
-        //                ShortName = currencyCode
-        //            },
-        //            CurrencyAmount = amount,
-        //        });
-        //    }
-
-        //    // Add all users positions
-        //    using (StreamWriter file = new StreamWriter(_fileNameWallet, true))
-        //    {
-        //        foreach (var previousPoistions in userWallet.WalletStatus)
-        //        {
-        //            file.WriteLine($"{walletId};{userName};{previousPoistions.Currency.ShortName};{previousPoistions.CurrencyAmount}");
-        //        }
-        //    }
-
-        //    // Add all other deposits from memory
-        //    foreach (var wallet in allWalletsExceptUser)
-        //    {
-        //        foreach (var walPos in wallet.WalletStatus)
-        //        {
-        //            using (StreamWriter file = new StreamWriter(_fileNameWallet, true))
-        //            {
-        //                file.WriteLine($"{wallet.Id};{walPos.UserName};{walPos.Currency.ShortName};{walPos.CurrencyAmount}");
-        //            }
-        //        }
-        //    }
-
     }
 }

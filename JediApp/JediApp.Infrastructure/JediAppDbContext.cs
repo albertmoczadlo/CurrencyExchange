@@ -31,12 +31,8 @@ public class JediAppDbContext : IdentityDbContext<User>
     public JediAppDbContext(DbContextOptions<JediAppDbContext> options)
         : base(options)
     {
-    }
 
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //{
-    //    //optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS; Database = JediDataTest; Trusted_Connection = true; ");
-    //}
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -52,35 +48,12 @@ public class JediAppDbContext : IdentityDbContext<User>
         }
 
         {
-            //builder.Entity<ExchangeOffice>()
-            //    .HasOne<User>(x => x.User)
-            //    .WithOne(u => u.ExchangeOffice)
-            //    .HasForeignKey<ExchangeOffice>(x => x.UserId);
-            
-        }
-
-        {
-            //builder.Entity<Currency>()
-            //.HasOne<WalletPosition>(p => p.WalletPosition)
-            //.WithOne(pp => pp.Currency)
-            //.HasForeignKey<WalletPosition>(pp => pp.CurrencyId);
-        }
-
-        {
             builder.Entity<ExchangeOffice>()
             .HasOne<ExchangeOfficeBoard>(p => p.ExchangeOfficeBoard)
             .WithOne(pp => pp.ExchangeOffice)
             .HasForeignKey<ExchangeOfficeBoard>(pp => pp.ExchangeOfficeId)
             .OnDelete(DeleteBehavior.Restrict);
         }
-
-        //{
-        //    builder.Entity<ExchangeOfficeBoard>()
-        //        .HasMany(e => e.Currencies)
-        //        .WithOne(c => c.ExchangeOfficeBoard)
-        //        .HasForeignKey(c => c.ExchangeOfficeBoardId);
-
-        //}
 
         {
             builder.Entity<Wallet>()
@@ -113,7 +86,6 @@ public class JediAppDbContext : IdentityDbContext<User>
 
 public class ApplicationUserEntityConfiguration : IEntityTypeConfiguration<User>
 {
-   
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.Property(u=>u.FirstName).HasMaxLength(50);

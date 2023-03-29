@@ -36,7 +36,7 @@ namespace JediApp.Database.Repositories
 
                 exchangeOffice.Name = exchangeOfficeToEdit.Name;
                 exchangeOffice.Address = exchangeOfficeToEdit.Address;
-                exchangeOffice.Markup = exchangeOfficeToEdit.Markup;                     
+                exchangeOffice.Markup = exchangeOfficeToEdit.Markup;
 
                 //_jediAppDb.SaveChangesAsync();
                 _jediAppDb.SaveChanges();
@@ -46,7 +46,7 @@ namespace JediApp.Database.Repositories
                 return false;
             }
             return true;
-        }         
+        }
 
     }
 }
