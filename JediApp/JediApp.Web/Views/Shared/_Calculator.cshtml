@@ -1,0 +1,120 @@
+﻿<div class="hero-form" style="width: 950px; height: 120px; margin: 50px auto;">
+	<div class="hero-form__section for-first-step">
+		<div class="hero-form__section-inner for-step-1">
+			<div class="hero-form__fields-with-connector">
+				<div class="hero-form__input-block ">
+					<div class="hero-form__input-block-label">
+						<div class="hero-form__input-block-label-text">I have</div>
+					</div>
+					<div class="hero-form__combined-inputs">
+						<div class="hero-form__text-input-holder">
+							<input id="txtMam" type="tel" onchange="obliczKwote(this);" value="1000" aria-label="Otrzymam" class="bem-text-input in-hero-form-big-enter-amount w-input" inputmode="decimal" maxlength="7">
+						</div>
+						<div class="hero-form__dropdown-holder clearfix">
+							<div class="bem-select-dropdown ">
+								<div id="divMam" class="hero-form__currency-flag icon-currency-round-PLN icon-currency-round-PLN-dims" style="margin-left: 5px;"></div>
+								<select name="" onchange="getValMam(this)" class="form-select" style="height: 47px;width: 105px;text-align: right;font-weight: bold;">
+									<option selected="selected" value="PLN">PLN</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="hero-form__fields-connector">
+					<div class="hero-form__connector-line"></div>
+					<div class="hero-form__swap-holder">
+						<div class="hero-form__swap-icon bem-icon is-swap-icon"></div>
+					</div>
+				</div>
+				<div class="hero-form__input-block is-second">
+					<div class="hero-form__input-block-label">
+						<div class="hero-form__input-block-label-text">I will receive</div>
+					</div>
+					<div class="hero-form__combined-inputs">
+						<div class="hero-form__text-input-holder">
+							<input id="txtOtrzymam" type="tel" value="1000" aria-label="Otrzymam" class="bem-text-input in-hero-form-big-enter-amount w-input" inputmode="decimal" maxlength="7" readonly>
+						</div>
+						<div class="hero-form__dropdown-holder clearfix">
+							<div class="bem-select-dropdown ">
+								<div id="divOtrzymam" class="hero-form__currency-flag icon-currency-round-EUR icon-currency-round-EUR-dims" style="margin-left: 5px;"></div>
+								<select id="dllOtrzymam" name="" onchange="getValOtrzymam(this);" class="form-select" style="height: 47px;width: 105px;text-align: right;font-weight: bold;">
+									
+									<option selected="selected" value="EUR">EUR</option>
+									<option value="CHF">CHF</option>
+									<option value="USD">USD</option>
+									<option value="GBP">GBP</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="hero-form__rate-texts bem-icon is-connector">
+			<div class="hero-form__rate-headers">
+				<span class="hero-form__rate-heading">Current rate:</span>
+				<div class="hero-form__rate-number-and-chart">
+					<div id="divKurs" class="hero-form__big-rate">@(ViewData["EUR_buy"])</div>
+					<div class="hero-form__exchange-info-icon bem-icon exchange-info-icon"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	var euroBuyAt = parseFloat("@(ViewData["EUR_buy"])".replace(/,/g, '.'));
+	var usdBuyAt = parseFloat("@(ViewData["USD_buy"])".replace(/,/g, '.'));
+	var chfBuyAt = parseFloat("@(ViewData["CHF_buy"])".replace(/,/g, '.'));
+	var gbpBuyAt = parseFloat("@(ViewData["GBP_buy"])".replace(/,/g, '.'));
+
+	function getValMam(selection) {
+		document.getElementById('divMam').className = "hero-form__currency-flag icon-currency-round-" + selection.value + " icon-currency-round-" + selection.value + "-dims";
+
+		ustawKurs(selection.value);
+		obliczKwote(document.getElementById('txtMam'))
+	}
+
+	function getValOtrzymam(selection) {
+		document.getElementById('divOtrzymam').className = "hero-form__currency-flag icon-currency-round-" + selection.value + " icon-currency-round-" + selection.value + "-dims";
+
+		ustawKurs(selection.value);
+		obliczKwote(document.getElementById('txtMam'))
+	}
+
+	function ustawKurs(waluta) {
+		if (waluta == 'GBP') {
+			document.getElementById('divKurs').innerHTML = gbpBuyAt;
+		}
+		if (waluta == 'USD') {
+			document.getElementById('divKurs').innerHTML = usdBuyAt;
+		}
+		if (waluta == 'CHF') {
+			document.getElementById('divKurs').innerHTML = chfBuyAt;
+		}
+		if (waluta == 'EUR') {
+			document.getElementById('divKurs').innerHTML = euroBuyAt;
+		}
+	}
+
+	function obliczKwote(wartosc) {
+		var kwota = wartosc.value;
+		var waluta = document.getElementById('dllOtrzymam').value;
+
+		if (waluta == 'GBP') {
+			document.getElementById('txtOtrzymam').value = (kwota / gbpBuyAt).toFixed(2);
+		}
+		if (waluta == 'USD') {
+			document.getElementById('txtOtrzymam').value = (kwota / usdBuyAt).toFixed(2);
+		}
+		if (waluta == 'CHF') {
+			document.getElementById('txtOtrzymam').value = (kwota / chfBuyAt).toFixed(2);
+		}
+		if (waluta == 'EUR') {
+			document.getElementById('txtOtrzymam').value = (kwota / euroBuyAt).toFixed(2);
+		}
+	}
+
+	obliczKwote(document.getElementById('txtMam'));
+</script>

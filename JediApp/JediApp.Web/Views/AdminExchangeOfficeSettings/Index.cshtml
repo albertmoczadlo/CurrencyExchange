@@ -1,0 +1,64 @@
+﻿@model IEnumerable<JediApp.Database.Domain.ExchangeOffice>
+
+@{
+    ViewData["Title"] = "Admin Exchange Office Settings";
+}
+
+<h2>Exchange Office Settings</h2>
+
+<p>
+    @*<a asp-action="Create">Create New</a>*@
+    
+@*    <form asp-action="AddCurrencyFromNbpApi">
+        <input type="button" value="Create New Currency" class="btn btn-primary" onclick="location.href='@Url.Action("Create", "ExchangeOfficeBoard" )'" />
+        <input type="submit" value="Add Currency From Nbp Api" class="btn btn-danger" />
+    </form>
+        <form asp-action="Markup">
+        <input type="submit" value="Add 5% Markup to the all Currencies" class="btn btn-info" />
+    </form>*@
+</p>
+
+<div class="hero-form pb-3">
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                @*<th>ID</th>*@
+                <th>Exchange Office Name</th>
+                <th>Address</th>
+                <th>Markup %</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    @*<td>@item.Id</td>*@
+                    <td>@item.Name</td>
+                    <td>@item.Address</td>
+                    <td>@item.Markup %</td>
+
+                    <td>
+                        @*<a asp-controller="ExchangeOfficeBoard" asp-action="Edit" asp-route-id="@item.Id" asp-route-someName="some value">Edit</a>*@
+                        @*              <a asp-controller="ExchangeOfficeBoard" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                    <a asp-controller="ExchangeOfficeBoard" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    <a asp-controller="ExchangeOfficeBoard" asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
+                            <input type="button" value="Edit" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Edit", "AdminExchangeOfficeSettings", new { Id = item.Id } )'" />
+                    </td>
+                    @*            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                </td>*@
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+
+
+
+

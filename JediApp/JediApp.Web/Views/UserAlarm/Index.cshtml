@@ -1,0 +1,64 @@
+﻿@model IEnumerable<JediApp.Database.Domain.UserAlarm>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>User alarms</h1>
+
+<input type="button" value="Create new Alarm" class="btn btn-secondary  btn-sm" onclick="location.href='@Url.Action("Create", "UserAlarm" )'" />
+
+@if (!Model.Any())
+{
+    <p style="padding: 25px 50px; font-weight: bold; text-align: center;">You don't have any active alarms. Click button above to create'</p>
+}
+else
+{
+    <div class="hero-form pb-3">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        <h6>Currency Name</h6>
+                    </th>
+                    <th>
+                        <h6>Short Name</h6>
+                    </th>
+                    <th>
+                        <h6>Alarm Buy At</h6>
+                    </th>
+                    <th>
+                        <h6>Alarm Sell At</h6>
+                    </th>
+
+                    <th><h6>Options</h6></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @item.CurrencyName
+                        </td>
+                        <td>
+                            @item.ShortName
+                        </td>
+                        <td>
+                            @item.AlarmBuyAt
+                        </td>
+                        <td>
+                            @item.AlarmSellAt
+                        </td>
+
+                        <td>
+                            <input type="button" value="Edit" class="btn btn-outline-secondary btn-sm align-text-bottom " onclick="location.href='@Url.Action("Edit", "UserAlarm", new { Id = item.Id } )'" />
+                            <input type="button" value="Delete" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Delete", "UserAlarm",new { Id = item.Id } )'" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

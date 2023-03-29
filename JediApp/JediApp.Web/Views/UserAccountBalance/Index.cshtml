@@ -1,0 +1,42 @@
+﻿@model IEnumerable<JediApp.Web.Models.UserDeposit>
+@{
+    ViewData["Title"] = "User account balance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>
+    User account balance
+</h2>
+
+@if(!Model.Any())
+{
+    <div style="margin: 45px auto; border: 1px solid black; padding: 20px 10px;">
+        <h1>Your Account Balance is empty. Perform Deposit first</h1>
+    </div>
+    <p>
+        <input type="button" value="Deposit" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Index", "UserDeposit" )'" />
+    </p>
+}
+@if(Model.Any())
+{
+    <div class="hero-form pb-3" style="margin: 30px auto; padding: 35px 10px; height: auto;">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Currency Name</th>
+                    <th style="width: 15%;">Currency Country</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Currency</td>
+                        <td><div class="hero-form__currency-flag icon-currency-round-@(item.Currency) icon-currency-round-@(item.Currency)-dims" style="position: relative; float: left;"></div></td>
+                        <td>@item.Amount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

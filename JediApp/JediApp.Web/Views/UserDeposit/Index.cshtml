@@ -1,0 +1,59 @@
+﻿@model JediApp.Web.Models.UserDeposit
+@{
+    ViewData["Title"] = "User Deposit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>
+    User Deposit
+</h2>
+<script>
+    function getValDeposit(selection) {
+        document.getElementById('divDeposit').className = "hero-form__currency-flag icon-currency-round-" + selection.value + " icon-currency-round-" + selection.value + "-dims";
+	}
+</script>
+
+<form asp-controller="UserDeposit" asp-action="Deposit" method="post" accept-charset="utf-8">
+<div class="hero-form" style="width: 705px; height: 140px; margin: 50px auto;">
+    <div class="hero-form__section for-first-step">
+        <div class="hero-form__section-inner for-step-1">
+            <div class="hero-form__fields-with-connector">
+                <div class="hero-form__input-block ">
+                    <div class="hero-form__input-block-label">
+                        <div class="hero-form__input-block-label-text">Amount</div>
+                    </div>
+                    <div class="hero-form__combined-inputs">
+                        <div class="hero-form__text-input-holder">
+                                <input asp-for="Amount" id="txtDeposit" type="text" pattern="[0-9,]+" value="1000" aria-label="Deposit" class="bem-text-input in-hero-form-big-enter-amount w-input" maxlength="7">
+                        </div>
+                        <div class="hero-form__dropdown-holder clearfix">
+                            <div class="bem-select-dropdown ">
+                                <div id="divDeposit" class="hero-form__currency-flag icon-currency-round-PLN icon-currency-round-PLN-dims" style="margin-left: 5px;"></div>
+                                    <select asp-for="Currency" name="Currency" onchange="getValDeposit(this)" class="form-select" style="height: 47px;width: 105px;text-align: right;font-weight: bold;">
+                                        @foreach (var item in ViewData["currencies"] as IEnumerable<string>)
+                                        {
+                                            if (item == "PLN")
+                                            {
+                                                <option selected="selected" value="@item">@item</option>
+                                            }
+                                            else 
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                            
+                                        }
+
+                                    </select>
+                            </div>
+                        </div>
+                        <div >
+                                <input id="depositButton" type="submit" value="Deposit" class="btn btn-outline-secondary btn-lg align-text-bottom mx-3" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</form>

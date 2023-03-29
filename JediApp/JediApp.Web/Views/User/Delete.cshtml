@@ -1,0 +1,22 @@
+﻿@model JediApp.Database.Domain.User;
+
+@{
+    ViewData["Title"] = $"Delete user";
+}
+
+<h2>Delete @Model.UserName</h2>
+
+<p>Are you sure you want to delete user @Model.FirstName @Model.LastName ?</p>
+
+<div>
+    <hr />
+    <dl class="row">
+    </dl>
+
+    <form asp-action="DeleteConfirmed">
+        <input type="hidden" value="@Model.Id" name="Id" />
+        <input type="submit" value="Delete" class="btn btn-outline-secondary btn-sm align-text-bottom" />
+        <input type="button" value="Back to List" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Index", "User" )'" />
+
+    </form>
+</div>

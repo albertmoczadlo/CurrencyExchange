@@ -1,0 +1,41 @@
+﻿@model JediApp.Database.Domain.Currency
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h3>Details</h3>
+    <hr />
+<div>
+    <h4>@Model.ShortName</h4>
+    <p>Full name: @Model.Name</p>
+    <p>Country: @Model.Country</p>
+</div>
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div id="tradingview_9a8f9" style="height:500px"></div>
+  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/symbols/@(Model.ShortName)PLN/" rel="noopener" target="_blank"><span class="blue-text">@(Model.ShortName)PLN chart</span></a> by TradingView</div>
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <script type="text/javascript">
+  new TradingView.widget(
+  {
+  "autosize": true,
+  "symbol": '@(Model.ShortName)PLN',
+  "interval": "D",
+  "timezone": "Etc/UTC",
+  "theme": "light",
+  "style": "2",
+  "locale": "en",
+  "toolbar_bg": "#f1f3f6",
+  "enable_publishing": false,
+  "allow_symbol_change": true,
+  "container_id": "tradingview_9a8f9"
+}
+  );
+  </script>
+</div>
+<!-- TradingView Widget END -->
+
+<div>
+    <input type="button" value="Back to List" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Index", "UserExchangeOfficeBoard" )'" />
+</div>

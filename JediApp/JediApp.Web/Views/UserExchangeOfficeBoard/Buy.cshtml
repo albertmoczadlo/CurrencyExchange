@@ -1,0 +1,55 @@
+﻿@model JediApp.Web.Models.UserExchange
+@{
+    ViewData["Title"] = "UserBuy";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>
+    Buy
+</h2>
+
+<form asp-controller="UserExchangeOfficeBoard" asp-action="Buy" method="post" accept-charset="utf-8">
+    <div class="hero-form" style="width: 705px; height: 140px; margin: 50px auto;">
+        <div class="hero-form__section for-first-step">
+            <div class="hero-form__section-inner for-step-1">
+                <div class="hero-form__fields-with-connector">
+                    <div class="hero-form__input-block ">
+                        <div class="hero-form__input-block-label">
+                            <div class="hero-form__input-block-label-text">Balance: @Model.ExchangeFromCurrencyAmount @Model.ExchangeFromCurrency</div>
+                            <div class="hero-form__input-block-label-text">Max buy: @Model.ExchangeMaxAmount @Model.ExchangeToCurrency Buy at @Model.BuyAt </div>
+                        </div>
+                        <div class="hero-form__combined-inputs">
+                            <div class="hero-form__text-input-holder">
+                                <input asp-for="ExchangeToCurrencyAmount" id="txtDeposit" type="text" pattern="[0-9,]+" value="@String.Format("{0:0.##}", Model.ExchangeToCurrencyAmount)" aria-label="Buy" class="bem-text-input in-hero-form-big-enter-amount w-input" maxlength="7">
+                            </div>
+                            <div class="hero-form__dropdown-holder clearfix">
+                                <div class="bem-select-dropdown ">
+                                    <div id="divDeposit" class="hero-form__currency-flag icon-currency-round-@Model.ExchangeToCurrency icon-currency-round-@Model.ExchangeToCurrency-dims" style="margin-left: 5px;"></div>
+                                    <select asp-for="ExchangeToCurrency" name="ExchangeToCurrency" class="form-select" style="height: 47px;width: 105px;text-align: right;font-weight: bold;">
+                                        <option selected="selected" value="@Model.ExchangeToCurrency">@Model.ExchangeToCurrency</option>
+                                    </select>
+                                </div>
+                            </div>
+                            @Html.HiddenFor(model => model.ExchangeFromCurrency)
+                            @Html.HiddenFor(model => model.ExchangeFromCurrencyAmount)
+                            @Html.HiddenFor(model => model.BuyAt)
+                            @Html.HiddenFor(model => model.ExchangeMaxAmount)
+                            <div>
+                                <input id="depositButton" type="submit" value="Buy" class="btn btn-outline-secondary btn-sm align-text-bottom" style="height: 47px;width: 120px; font-weight: bold; margin-left: 80px; background-color: #6775f3; border-color: #6775f3;" />
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (ViewData["errorMessage"] != null)
+{
+    <div style="border: 1px solid #6775f3; color: black; padding: 20px;">
+        <h4>@ViewData["errorMessage"]</h4>
+        Your current saldo: @ViewData["currentBalance"]
+    </div>
+}

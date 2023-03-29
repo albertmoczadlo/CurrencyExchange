@@ -1,0 +1,43 @@
+﻿@model IEnumerable<JediApp.Web.Models.AdminDeposit>
+@{
+    ViewData["Title"] = "Money available on the stock";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>
+    Money available on the stock
+</h2>
+
+@if(!Model.Any())
+{
+    <div style="margin: 45px auto; border: 1px solid black; padding: 20px 10px;">
+        <h1>Money Stock is currently empty. Perform Deposit first</h1>
+    </div>
+}
+<p>
+    <input type="button" value="Add money to stock" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("DepositIndex", "MoneyStock" )'" />
+</p>
+
+@if(Model.Any())
+{
+<div class="hero-form pb-3">
+        <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th style="width: 15%;">Currency Name</th>
+                <th style="width: 15%;">Currency Country</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Currency</td>
+                    <td><div class="hero-form__currency-flag icon-currency-round-@(item.Currency) icon-currency-round-@(item.Currency)-dims" style="position: relative; float: left;"></div></td>
+                    <td>@item.Amount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+}

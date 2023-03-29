@@ -1,0 +1,24 @@
+﻿@model JediApp.Database.Domain.Currency
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>@Model.ShortName</h4>
+    <hr />
+    <h5>Short name: @Model.ShortName</h5>
+    <p>Name: @Model.Name</p>
+    <p>Country: @Model.Country</p>
+    <p>BuyAt: @Model.BuyAt</p>
+    <p>SellAt: @Model.SellAt</p>
+</div>
+<div>
+    @*@Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |*@
+    @*<a asp-controller="ExchangeOfficeBoard" asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |*@
+    @*<a asp-action="Index">Back to List</a>*@
+    <input type="button" value="Edit" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Edit", "ExchangeOfficeBoard", new { Id = Model.Id } )'" />
+    <input type="button" value="Back to List" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Index", "ExchangeOfficeBoard" )'" />
+</div>

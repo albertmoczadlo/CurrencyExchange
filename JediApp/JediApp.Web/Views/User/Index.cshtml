@@ -1,0 +1,65 @@
+﻿@model IEnumerable<JediApp.Database.Domain.User>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>List Users</h1>
+
+<div class="hero-form pb-3">
+    <table class="table table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>
+                <h6>First Name</h6>
+            </th>
+            <th>
+                <h6>Last Name</h6>
+            </th>
+            <th>
+                <h6>User Name</h6>
+            </th>
+            <th>
+                <h6>Email</h6>
+            </th>
+            @* <th>
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </th>*@
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.FirstName
+                </td>
+                <td>
+                    @item.LastName
+                </td>
+                <td>
+                    @item.UserName
+                </td>
+                <td>
+                    @item.Email
+                </td>
+                @* <td>
+                    @item.PhoneNumber
+                </td>*@
+                <td>
+                    @* <input type="button" value="Edit" class="btn btn-outline-secondary btn-sm align-text-bottom " onclick="location.href='@Url.Action("Edit", "User", new { Id = item.Id } )'" />*@
+                    <input type="button" value="Details" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Details", "User",new { Id = item.Id } )'" />
+                    <input type="button" value="Delete" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Delete", "User",new { Id = item.Id } )'" />
+
+                    @*<a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+

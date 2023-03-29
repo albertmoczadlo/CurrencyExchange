@@ -1,0 +1,65 @@
+﻿@model JediApp.Web.Models.AdminDeposit
+@{
+    ViewData["Title"] = "Admin deposit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>
+    Admin Deposit
+</h2>
+<script>
+    function getValDeposit(selection) {
+        document.getElementById('divDeposit').className = "hero-form__currency-flag icon-currency-round-" + selection.value + " icon-currency-round-" + selection.value + "-dims";
+    }
+</script>
+
+<form asp-controller="MoneyStock" asp-action="Deposit" method="post" accept-charset="utf-8">
+    <div class="hero-form" style="width: 705px; height: 140px; margin: 50px auto;">
+        <div class="hero-form__section for-first-step">
+            <div class="hero-form__section-inner for-step-1">
+                <div class="hero-form__fields-with-connector">
+                    <div class="hero-form__input-block ">
+                        <div class="hero-form__input-block-label">
+                            <div class="hero-form__input-block-label-text">Deposit</div>
+                        </div>
+                        <div class="hero-form__combined-inputs">
+                            <div class="hero-form__text-input-holder">
+                                <input asp-for="Amount" id="txtDeposit" type="text" pattern="[0-9,]+" value="1000" aria-label="Deposit" class="bem-text-input in-hero-form-big-enter-amount w-input" maxlength="7">
+                            </div>
+                            <div class="hero-form__dropdown-holder clearfix">
+                                <div class="bem-select-dropdown ">
+                                    <div id="divDeposit" class="hero-form__currency-flag icon-currency-round-PLN icon-currency-round-PLN-dims" style="margin-left: 5px;"></div>
+                                    <select asp-for="Currency" name="Currency" onchange="getValDeposit(this)" class="form-select" style="height: 47px;width: 105px;text-align: right;font-weight: bold;">
+                                        <option selected="selected" value="PLN">PLN</option>
+                                        <option value="EUR">EUR</option>
+                                        <option value="CHF">CHF</option>
+                                        <option value="USD">USD</option>
+                                        <option value="GBP">GBP</option>
+                                        <option value="DKK">DKK</option>
+                                        <option value="SEK">SEK</option>
+                                        <option value="NOK">NOK</option>
+                                        <option value="JPY">JPY</option>
+                                        <option value="HUF">HUF</option>
+                                        <option value="CZK">CZK</option>
+                                        <option value="CAD">CAD</option>
+                                        <option value="AUD">AUD</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <input id="depositButton" type="submit" value="Deposit" class="btn btn-outline-secondary btn-sm align-text-bottom" style="height: 47px;width: 105px; font-weight: bold; margin-left: 80px; background-color: #6775f3; border-color: #6775f3;" />
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<h5>
+    <b>
+        @(ViewData["currentSaldo"])
+        @(ViewData["currenncy"])
+    </b>
+</h5>

@@ -1,0 +1,55 @@
+﻿@addTagHelper*, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model JediApp.Web.Models.AdminReport
+
+@{
+    ViewData["Title"] = "AdminReport";
+}
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#btnSubmit").click(function () {
+                $("input[name='GridHtml']").val($("#Grid").html());
+            });
+        });
+    </script>
+
+
+    <form asp-action="GetPDF">
+        <input type="hidden" name="GridHtml" />
+    <input type="submit" id="btnSubmit" value="Download as PDF" class="btn btn-outline-secondary btn-sm align-text-bottom" />
+    </form>
+<br />
+<div id="Grid">
+<h4>Exchange Office Report</h4>
+    <div class="card">
+        <div class="card-body">
+                <h5 class="card-title">App user accounts</h5>
+                    <p class="card-text">User accounts: @Model.UserAccounts</p>
+                    <p class="card-text">User email confirmed: @Model.UserEmailConfirmed</p>
+        </div>      
+    </div>
+    <div class="card">
+        <div class="card-body">
+                <h5 class="card-title">Turnover</h5>
+@*                    <p class="card-text">Annual: @Model.AnnualTurnover</p>
+                    <p class="card-text">Monthly: @Model.MonthlyTurnover</p>
+                    <p class="card-text">Daily: @Model.DailyTurnover</p>*@
+                     <p class="card-text">PLN: @Model.TurnoverPLN</p>
+                     <p class="card-text">EUR: @Model.TurnoverEUR</p>
+                     <p class="card-text">USD: @Model.TurnoverUSD</p>
+                     <p class="card-text">GBP: @Model.TurnoverGBP</p>
+                     <p class="card-text">CHF: @Model.TurnoverCHF</p>
+                     <p class="card-text">CZK: @Model.TurnoverCZK</p>
+        </div>      
+    </div>
+        <div class="card">
+        <div class="card-body">
+                <h5 class="card-title">Transactions</h5>
+                    <p class="card-text">Annual: @Model.AnnualTransactions</p>
+                    <p class="card-text">Monthly: @Model.MonthlyTransactions</p>
+                    <p class="card-text">Daily: @Model.DailyTTransactions</p>
+        </div>      
+    </div>                
+</div>

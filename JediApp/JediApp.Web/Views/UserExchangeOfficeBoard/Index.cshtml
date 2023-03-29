@@ -1,0 +1,47 @@
+﻿@model IEnumerable<JediApp.Database.Domain.Currency>
+
+@{
+    ViewData["Title"] = "Exchange Office Board";
+}
+
+<h4>Exchange Office Board</h4>
+
+<div class="hero-form pb-3">
+
+    @*<table class="table table-bordered">*@
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th >Currency name</th>
+                <th >Symbol</th>
+                <th >Country</th>
+                <th >Buy AT</th>
+                <th >Sell AT</th>
+                <th >Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                        <td >@item.Name</td>
+                        <td >@item.ShortName</td>
+                            <td >@item.Country</td>
+                        <td >@item.BuyAt</td>
+                        <td >@item.SellAt</td>
+                    <td>
+                            <input type="button" value="Details / Chart" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Details", "UserExchangeOfficeBoard",new { Id = item.Id } )'" />
+                            <input type="button" value="Buy" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Buy", "UserExchangeOfficeBoard",new { Id = item.Id } )'" />
+                        <input type="button" value="Sell" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Sell", "UserExchangeOfficeBoard",new { Id = item.Id } )'" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+
+
+
+

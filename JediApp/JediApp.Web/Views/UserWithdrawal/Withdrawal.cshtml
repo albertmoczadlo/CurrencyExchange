@@ -1,0 +1,50 @@
+﻿@model JediApp.Web.Models.UserWithdrawal
+@{
+    ViewData["Title"] = "User Withdrawal";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>
+    Withdrawal
+</h2>
+
+<form asp-controller="UserWithdrawal" asp-action="Withdrawal" method="post" accept-charset="utf-8">
+    <div class="hero-form" style="width: 705px; height: 140px; margin: 50px auto;">
+        <div class="hero-form__section for-first-step">
+            <div class="hero-form__section-inner for-step-1">
+                <div class="hero-form__fields-with-connector">
+                    <div class="hero-form__input-block ">
+                        <div class="hero-form__input-block-label">
+                            <div class="hero-form__input-block-label-text">Amount</div>
+                        </div>
+                        <div class="hero-form__combined-inputs">
+                            <div class="hero-form__text-input-holder">
+                                <input asp-for="Amount" id="txtDeposit" type="text" pattern="[0-9,]+" value="@String.Format("{0:0.##}", Model.Amount)" aria-label="Deposit" class="bem-text-input in-hero-form-big-enter-amount w-input" maxlength="7">
+                            </div>
+                            <div class="hero-form__dropdown-holder clearfix">
+                                <div class="bem-select-dropdown ">
+                                    <div id="divDeposit" class="hero-form__currency-flag icon-currency-round-@Model.Currency icon-currency-round-@Model.Currency-dims" style="margin-left: 5px;"></div>
+                                    <select asp-for="Currency" name="Currency" class="form-select" style="height: 47px;width: 105px;text-align: right;font-weight: bold;">
+                                        <option selected="selected" value="@Model.Currency">@Model.Currency</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <input id="depositButton" type="submit" value="Withdrawal" class="btn btn-outline-secondary btn-sm align-text-bottom" style="height: 47px;width: 120px; font-weight: bold; margin-left: 80px; background-color: #6775f3; border-color: #6775f3;" />
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (ViewData["errorMessage"] != null)
+{
+    <div style="border: 1px solid #6775f3; color: black; padding: 20px;">
+        <h4>@ViewData["errorMessage"]</h4>
+        Your current saldo: @ViewData["currentBalance"]
+    </div>
+}

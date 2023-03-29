@@ -1,0 +1,17 @@
+﻿@page
+
+@using JediApp.Database.Domain;
+@inject UserManager<User> UserManager
+
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Email Successfully Confirmed!";
+}
+
+<h1>ConfirmEmail</h1>
+
+<div>
+    <p>
+        Thank you for confirming your email. Now you can proceed to Login page.
+    </p>
+</div>

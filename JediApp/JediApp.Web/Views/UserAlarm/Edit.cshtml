@@ -1,0 +1,66 @@
+﻿@model JediApp.Database.Domain.UserAlarm;
+
+
+@{
+    ViewData["Title"] = "Edit";
+}
+<script>
+    function getValDeposit(selection) {
+        document.getElementById('divDeposit').className = "hero-form__currency-flag icon-currency-round-" + selection.value + " icon-currency-round-" + selection.value + "-dims";
+    }
+</script>
+<h1>Edit</h1>
+
+<h4>UserAlarm</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditConfirmed" method="post">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+           
+            <div class="form-group">
+                <div>Alarm for Currency:</div>
+                <div class="hero-form__dropdown-holder clearfix">
+                    <div class="bem-select-dropdown ">
+                        <div id="divDeposit" class="hero-form__currency-flag icon-currency-round-PLN icon-currency-round-PLN-dims" style="margin-left: 5px;"></div>
+                        <select asp-for="ShortName" name="ShortName" onchange="getValDeposit(this)" class="form-select" style="height: 47px;width: 105px;text-align: right;font-weight: bold;">
+                            @foreach (var item in ViewData["currencies"] as IEnumerable<string>)
+                            {
+                                if (item == "PLN")
+                                {
+                                    <option selected="selected" value="@item">@item</option>
+                                }
+                                else
+                                {
+                                    <option value="@item">@item</option>
+                                }
+
+                            }
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="AlarmBuyAt" class="control-label"></label>
+                <input asp-for="AlarmBuyAt" class="form-control" pattern="[0-9,]+" />
+                <span asp-validation-for="AlarmBuyAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AlarmSellAt" class="control-label"></label>
+                <input asp-for="AlarmSellAt" class="form-control" pattern="[0-9,]+" />
+                <span asp-validation-for="AlarmSellAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="hidden" value="@Model.Id" name="Id" />
+                <input type="submit" value="Save" class="btn btn-outline-secondary btn-sm align-text-bottom" />
+                <input type="button" value="Back to List" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Index", "UserAlarm" )'" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    @*<a asp-action="Index">Back to List</a>*@
+</div>

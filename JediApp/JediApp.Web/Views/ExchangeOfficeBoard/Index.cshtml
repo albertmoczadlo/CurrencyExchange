@@ -1,0 +1,80 @@
+﻿@model IEnumerable<JediApp.Database.Domain.Currency>
+
+@{
+    ViewData["Title"] = "Exchange Office Board";
+}
+
+<h4>Admin Exchange Office Board</h4>
+
+<p>
+    @*<a asp-action="Create">Create New</a>*@
+    
+    <form asp-action="AddCurrencyFromNbpApi">
+        <input type="button" value="Create new currency" class="btn btn-secondary  btn-sm" onclick="location.href='@Url.Action("Create", "ExchangeOfficeBoard" )'" />
+        <input type="submit" value="Import currency from NBP Api" class="btn btn-danger  btn-sm" />
+    </form>
+</p>
+<p>
+    <form asp-action="UpdateCurrencyRatesFromNbpApi">
+        <input type="button" value="Visit www.nbp.pl" class="btn btn-secondary  btn-sm" onclick="window.open('https://www.nbp.pl/home.aspx?f=/kursy/kursyc.html')" />
+        <input type="submit" value="Update currency rates from NBP Api" class="btn btn-danger  btn-sm" />
+    </form>
+</p>
+<p>
+    <form asp-action="Markup">
+        <input type="button" value="Go to the change markup settings" class="btn btn-secondary  btn-sm" onclick="location.href='@Url.Action("Index", "AdminExchangeOfficeSettings" )'" />
+        <input type="submit" value="Add markup to the all currencies" class="btn btn-danger  btn-sm" />
+    </form>
+</p>
+
+<div class="hero-form pb-3">
+
+    @*<table class="table table-bordered">*@
+        @*<table cellpadding="5" cellspacing="0" style="border: 1px solid #ccc;font-size: 10pt;">*@
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                @*<th>ID</th>*@
+                <th >Currency name</th>
+                <th >Symbol</th>
+                <th >Country</th>
+                <th >Buy AT</th>
+                <th >Sell AT</th>
+                <th >Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    @*<td>@item.Id</td>*@
+                            <td >@item.Name</td>
+                            <td >@item.ShortName</td>
+                            <td >@item.Country</td>
+                            <td >@item.BuyAt</td>
+                            <td >@item.SellAt</td>
+                            <td >
+                        @*<a asp-controller="ExchangeOfficeBoard" asp-action="Edit" asp-route-id="@item.Id" asp-route-someName="some value">Edit</a>*@
+                        @*              <a asp-controller="ExchangeOfficeBoard" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                    <a asp-controller="ExchangeOfficeBoard" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    <a asp-controller="ExchangeOfficeBoard" asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
+                        <input type="button" value="Details" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Details", "ExchangeOfficeBoard",new { Id = item.Id } )'" />
+                            <input type="button" value="Edit" class="btn btn-outline-secondary btn-sm align-text-bottom " onclick="location.href='@Url.Action("Edit", "ExchangeOfficeBoard", new { Id = item.Id } )'" />
+                        <input type="button" value="Delete" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Delete", "ExchangeOfficeBoard",new { Id = item.Id } )'" />
+                    </td>
+                    @*            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                </td>*@
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+
+
+
+
