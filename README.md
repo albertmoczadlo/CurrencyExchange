@@ -38,7 +38,7 @@ The application was created using the following technologies:
 
 The application was created by Katarzyna Rogowska, Mirosław Pizun, and Albert Moczadło.
 
-=======================================================================================================================================================================
+=================================================================
 
 # Kantor internetowy
 
