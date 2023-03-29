@@ -29,17 +29,6 @@ using IHost host = Host.CreateDefaultBuilder(args)
             //.AddScoped<IScopedOperation, DefaultOperation>()       //example
             //.AddSingleton<ISingletonOperation, DefaultOperation>() //example
             //.AddTransient<OperationLogger>()                       //example
-            
-            
-            .AddScoped<IExchangeOfficeBoardRepository, ExchangeOfficeBoardRepository>()
-            .AddScoped<IExchangeOfficeBoardService, ExchangeOfficeBoardService>()
-            .AddScoped<INbpJsonRepository, NbpJsonRepository>()
-            .AddScoped<INbpJsonService, NbpJsonService>()
-            .AddScoped<IAvailableMoneyOnStockRepository, AvailableMoneyOnStockRepository>()
-            .AddScoped<ITransactionHistoryService, TransactionHistoryService>()
-            .AddSingleton<UserService>()
-            .AddSingleton<ExchangeOfficeBoardService>()
-            .AddSingleton<MenuService>()
             )
     .Build();
 
