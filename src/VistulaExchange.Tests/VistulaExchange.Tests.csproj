@@ -26,6 +26,7 @@
     <ProjectReference Include="..\VistulaExchange.Database\VistulaExchange.Database.csproj" />
     <ProjectReference Include="..\VistulaExchange.Infrastructure\VistulaExchange.Infrastructure.csproj" />
     <ProjectReference Include="..\VistulaExchange.Services\VistulaExchange.Services.csproj" />
+    <ProjectReference Include="..\VistulaExchange.Web\VistulaExchange.Web.csproj" />
   </ItemGroup>
 
 </Project>
