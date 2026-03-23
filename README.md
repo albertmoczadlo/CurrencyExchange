@@ -24,7 +24,3 @@ The current work is focused on:
 - stabilizing the architecture and asynchronous flows
 - upgrading the solution from .NET 6 to a supported runtime
 - cleaning warnings and preparing the app for a full visual redesign
-
-## Author
-
-Sole author: Albert Moczadlo
