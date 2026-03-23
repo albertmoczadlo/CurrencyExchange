@@ -2,6 +2,7 @@
 
 using System.Threading.Tasks;
 using VistulaExchange.Database.Domain;
+using VistulaExchange.Database.Models;
 
 namespace VistulaExchange.Database.Interface
 {
@@ -10,5 +11,6 @@ namespace VistulaExchange.Database.Interface
         Task<List<Currency>> GetAllCurrenciesAsync();
         Task<NBPJsonRoot?> GetNBPJsonTableInfoAsync();
         Task<List<Currency>> BrowseCurrencyAsync(string query);
+        Task<IReadOnlyList<CurrencyHistoryPoint>> GetCurrencyHistoryAsync(string currencyCode, int days);
     }
 }

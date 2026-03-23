@@ -4,9 +4,10 @@ namespace VistulaExchange.Services.Services.Interfaces
 {
     public interface IUserWalletService
     {
-        WalletPosition GetCurrencyBalanceById(string userId, Guid currencyId);
-        void Withdrawal(string userId, string currencyCode, decimal withdrawalAmount, string description);
-        void Deposit(string userId, string currencyCode, decimal depositAmount, string description);
-
+        Task<Wallet> GetWalletAsync(string userId);
+        Task<WalletPosition> GetCurrencyBalanceByIdAsync(string userId, Guid currencyId);
+        Task<WalletPosition> GetCurrencyBalanceByCodeAsync(string userId, string currencyCode);
+        Task WithdrawalAsync(string userId, string currencyCode, decimal withdrawalAmount, string description);
+        Task DepositAsync(string userId, string currencyCode, decimal depositAmount, string description);
     }
 }

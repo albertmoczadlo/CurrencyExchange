@@ -1,64 +1,76 @@
 @model IEnumerable<VistulaExchange.Database.Domain.UserAlarm>
 
 @{
-    ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Rate Alerts";
+    var alarms = Model.ToList();
 }
 
-<h1>User alarms</h1>
-
-<input type="button" value="Create new Alarm" class="btn btn-secondary  btn-sm" onclick="location.href='@Url.Action("Create", "UserAlarm" )'" />
-
-@if (!Model.Any())
-{
-    <p style="padding: 25px 50px; font-weight: bold; text-align: center;">You don't have any active alarms. Click button above to create'</p>
-}
-else
-{
-    <div class="hero-form pb-3">
-        <table class="table table-bordered table-hover">
-            <thead>
-                <tr>
-                    <th>
-                        <h6>Currency Name</h6>
-                    </th>
-                    <th>
-                        <h6>Short Name</h6>
-                    </th>
-                    <th>
-                        <h6>Alarm Buy At</h6>
-                    </th>
-                    <th>
-                        <h6>Alarm Sell At</h6>
-                    </th>
-
-                    <th><h6>Options</h6></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>
-                            @item.CurrencyName
-                        </td>
-                        <td>
-                            @item.ShortName
-                        </td>
-                        <td>
-                            @item.AlarmBuyAt
-                        </td>
-                        <td>
-                            @item.AlarmSellAt
-                        </td>
-
-                        <td>
-                            <input type="button" value="Edit" class="btn btn-outline-secondary btn-sm align-text-bottom " onclick="location.href='@Url.Action("Edit", "UserAlarm", new { Id = item.Id } )'" />
-                            <input type="button" value="Delete" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Delete", "UserAlarm",new { Id = item.Id } )'" />
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<section class="workspace-shell">
+    <div class="page-head">
+        <div>
+            <span class="page-head__eyebrow">Alert Center</span>
+            <h1>Rate alerts</h1>
+            <p>Build buy-dip and sell-spike targets, then keep the closest moves visible in your workspace.</p>
+        </div>
+        <div class="dashboard-card__actions">
+            <a class="app-btn app-btn--primary" asp-action="Create">Create alert</a>
+        </div>
     </div>
-}
+
+    <div class="hero-stat-grid hero-stat-grid--dashboard">
+        <article class="hero-stat">
+            <span class="hero-stat__label">Active alerts</span>
+            <strong class="hero-stat__value">@alarms.Count</strong>
+            <span class="hero-stat__hint">Every alert can watch a buy or sell threshold independently.</span>
+        </article>
+        <article class="hero-stat">
+            <span class="hero-stat__label">Buy targets</span>
+            <strong class="hero-stat__value">@alarms.Count(alarm => alarm.AlarmBuyAt > 0)</strong>
+            <span class="hero-stat__hint">Configured dip entries waiting for a better buy price.</span>
+        </article>
+        <article class="hero-stat">
+            <span class="hero-stat__label">Sell targets</span>
+            <strong class="hero-stat__value">@alarms.Count(alarm => alarm.AlarmSellAt > 0)</strong>
+            <span class="hero-stat__hint">Configured exit levels ready for stronger sell prices.</span>
+        </article>
+    </div>
+
+    @if (!alarms.Any())
+    {
+        <div class="empty-state empty-state--soft">
+            <h2>No active alerts yet</h2>
+            <p>Create the first target and the dashboard will start surfacing the closest market opportunities.</p>
+        </div>
+    }
+    else
+    {
+        <div class="alert-board">
+            @foreach (var item in alarms)
+            {
+                <article class="alert-card">
+                    <div class="alert-card__head">
+                        <div>
+                            <span class="holding-card__code">@item.ShortName</span>
+                            <h3>@item.CurrencyName</h3>
+                        </div>
+                        <span class="market-chip">@(item.AlarmBuyAt > 0 && item.AlarmSellAt > 0 ? "Dual trigger" : item.AlarmBuyAt > 0 ? "Buy watch" : "Sell watch")</span>
+                    </div>
+                    <dl class="alert-card__stats">
+                        <div>
+                            <dt>Buy target</dt>
+                            <dd>@(item.AlarmBuyAt > 0 ? item.AlarmBuyAt.ToString("0.0000") : "—")</dd>
+                        </div>
+                        <div>
+                            <dt>Sell target</dt>
+                            <dd>@(item.AlarmSellAt > 0 ? item.AlarmSellAt.ToString("0.0000") : "—")</dd>
+                        </div>
+                    </dl>
+                    <div class="holding-card__actions">
+                        <a class="market-card__action market-card__action--accent" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <a class="market-card__action" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>

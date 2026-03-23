@@ -4,11 +4,8 @@ namespace VistulaExchange.Services.Services.Interfaces
 {
     public interface ITransactionHistoryService
     {
-        public bool AddTransaction(TransactionHistory transactionHistory);
-        //public List<TransactionHistory> GetUserHistoryByUserId(Guid userId);
-        public List<TransactionHistory> GetUserHistoryByUserId(string userId);
-
-        public List<TransactionHistory> GetAllUsersHistories();
-
+        Task<bool> AddTransactionAsync(TransactionHistory transactionHistory);
+        Task<List<TransactionHistory>> GetUserHistoryByUserIdAsync(string userId);
+        Task<List<TransactionHistory>> GetAllUsersHistoriesAsync();
     }
 }

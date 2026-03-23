@@ -1,5 +1,4 @@
 using VistulaExchange.Database.Domain;
-using VistulaExchange.Database.Interface;
 using VistulaExchange.Services.Helpers;
 using VistulaExchange.Services.Services.Interfaces;
 
@@ -9,16 +8,16 @@ namespace VistulaExchange.Services.Services.Service
     {
         private readonly IUserService _userService;
         private readonly IExchangeOfficeBoardService _exchangeOfficeBoardSevice;
-        private readonly IAvailableMoneyOnStockRepository _availableMoneyOnStock;
+        private readonly IAvailableMoneyOnStockService _availableMoneyOnStockService;
         private readonly INbpJsonService _nbpJsonService;
         private readonly ITransactionHistoryService _transactionHistoryService;
 
-        public MenuRoleAdminService(IUserService userService, IExchangeOfficeBoardService exchangeOfficeBoardSevice, IAvailableMoneyOnStockRepository availableMoneyOnStock, INbpJsonService nbpJsonService, ITransactionHistoryService transactionHistoryService)
+        public MenuRoleAdminService(IUserService userService, IExchangeOfficeBoardService exchangeOfficeBoardSevice, IAvailableMoneyOnStockService availableMoneyOnStockService, INbpJsonService nbpJsonService, ITransactionHistoryService transactionHistoryService)
         {
             _userService = userService;
             _exchangeOfficeBoardSevice = exchangeOfficeBoardSevice;
             _nbpJsonService = nbpJsonService;
-            _availableMoneyOnStock = availableMoneyOnStock;
+            _availableMoneyOnStockService = availableMoneyOnStockService;
             _transactionHistoryService = transactionHistoryService;
         }
 
@@ -116,7 +115,7 @@ namespace VistulaExchange.Services.Services.Service
 
         }
 
-        public void AddMoneyToStock()
+        public async Task AddMoneyToStockAsync()
         {
             var availableCurrencies = _exchangeOfficeBoardSevice.GetAllCurrencies();
             Console.WriteLine("Select available currency:");
@@ -136,13 +135,13 @@ namespace VistulaExchange.Services.Services.Service
             moneyToBeAdded.Value = moneyInStock;
             moneyToBeAdded.CurrencyName = availableCurrencies[selectedCurrencyIndex - 1].Name;
 
-            _availableMoneyOnStock.AddMoneyToStock(moneyToBeAdded);
+            await _availableMoneyOnStockService.AddMoneyToStockAsync(moneyToBeAdded);
             Console.WriteLine($"{moneyInStock} {moneyToBeAdded.CurrencyName} has been added.");
         }
 
-        public void ShowAvailableMoneyOnStock()
+        public async Task ShowAvailableMoneyOnStockAsync()
         {
-            var moneyOnStock = _availableMoneyOnStock.GetAvailableMoneyOnStock();
+            var moneyOnStock = await _availableMoneyOnStockService.GetAvailableMoneyOnStockAsync();
             Console.WriteLine("Available money in exchange office:");
             foreach (MoneyOnStock item in moneyOnStock)
             {

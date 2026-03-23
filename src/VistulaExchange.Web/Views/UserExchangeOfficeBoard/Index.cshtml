@@ -1,47 +1,100 @@
-@model IEnumerable<VistulaExchange.Database.Domain.Currency>
+@model VistulaExchange.Web.Models.ExchangeBoardViewModel
 
 @{
-    ViewData["Title"] = "Exchange Office Board";
+    ViewData["Title"] = Model.Title;
+    var lowestSpread = Model.Currencies.OrderBy(a => a.Spread).FirstOrDefault();
 }
 
-<h4>Exchange Office Board</h4>
-
-<div class="hero-form pb-3">
-
-    @*<table class="table table-bordered">*@
-    <table class="table table-bordered table-hover">
-        <thead>
-            <tr>
-                <th >Currency name</th>
-                <th >Symbol</th>
-                <th >Country</th>
-                <th >Buy AT</th>
-                <th >Sell AT</th>
-                <th >Options</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+<section class="desk-shell" data-board-shell>
+    <div class="page-head">
+        <div>
+            <span class="page-head__eyebrow">Client Trading Desk</span>
+            <h1>@Model.Title</h1>
+            <p>@Model.Subtitle</p>
+        </div>
+        <div class="page-head__summary">
+            <div class="page-pill">
+                <span>Visible pairs</span>
+                <strong data-results-count>@Model.Currencies.Count</strong>
+            </div>
+            @if (lowestSpread != null)
             {
-                <tr>
-                        <td >@item.Name</td>
-                        <td >@item.ShortName</td>
-                            <td >@item.Country</td>
-                        <td >@item.BuyAt</td>
-                        <td >@item.SellAt</td>
-                    <td>
-                            <input type="button" value="Details / Chart" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Details", "UserExchangeOfficeBoard",new { Id = item.Id } )'" />
-                            <input type="button" value="Buy" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Buy", "UserExchangeOfficeBoard",new { Id = item.Id } )'" />
-                        <input type="button" value="Sell" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Sell", "UserExchangeOfficeBoard",new { Id = item.Id } )'" />
-                    </td>
-                </tr>
+                <div class="page-pill">
+                    <span>Fastest entry read</span>
+                    <strong>@lowestSpread.ShortName · @lowestSpread.Spread.ToString("0.0000")</strong>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    </div>
 
-</div>
+    <div class="desk-toolbar">
+        <form method="get" asp-action="Index" class="desk-search">
+            <i class="bi bi-search"></i>
+            <input type="text"
+                   name="query"
+                   value="@Model.SearchQuery"
+                   placeholder="Search by code, country or market name"
+                   data-board-filter
+                   aria-label="Search board" />
+        </form>
 
+        <div class="desk-toolbar__actions">
+            <a class="app-btn app-btn--ghost" asp-controller="UserAlarm" asp-action="Index">Rate alerts</a>
+            <a class="app-btn app-btn--ghost" asp-controller="UserDeposit" asp-action="Index">Deposit funds</a>
+            <a class="app-btn app-btn--primary" asp-controller="UserAccountBalance" asp-action="Index">Wallet balance</a>
+        </div>
+    </div>
 
+    <div class="market-board-grid" data-board-grid>
+        @foreach (var currency in Model.Currencies)
+        {
+            <article class="market-card"
+                     data-market-card
+                     data-market-name="@($"{currency.Name} {currency.ShortName} {currency.Country}")">
+                <div class="market-card__top">
+                    <div>
+                        <span class="market-card__code">@currency.ShortName</span>
+                        <h3>@currency.Name</h3>
+                        <p>@currency.Country</p>
+                    </div>
+                    <div class="market-card__meta">
+                        <button type="button"
+                                class="watchlist-toggle"
+                                data-watchlist-toggle
+                                data-watchlist-code="@currency.ShortName"
+                                aria-label="Toggle @currency.ShortName in watchlist">
+                            <i class="ri-star-line"></i>
+                        </button>
+                        <span class="market-chip">@currency.SpreadProfile</span>
+                    </div>
+                </div>
 
+                <dl class="market-card__stats">
+                    <div>
+                        <dt>Buy</dt>
+                        <dd>@currency.BuyAt.ToString("0.0000")</dd>
+                    </div>
+                    <div>
+                        <dt>Sell</dt>
+                        <dd>@currency.SellAt.ToString("0.0000")</dd>
+                    </div>
+                    <div>
+                        <dt>Spread</dt>
+                        <dd>@currency.Spread.ToString("0.0000")</dd>
+                    </div>
+                </dl>
 
+                <div class="market-card__actions">
+                    <a class="market-card__action" asp-action="Details" asp-route-id="@currency.Id">Details</a>
+                    <a class="market-card__action market-card__action--accent" asp-action="Buy" asp-route-id="@currency.Id">Buy</a>
+                    <a class="market-card__action" asp-action="Sell" asp-route-id="@currency.Id">Sell</a>
+                </div>
+            </article>
+        }
+    </div>
 
+    <div class="empty-state" data-empty-state @(Model.Currencies.Count == 0 ? string.Empty : "hidden")>
+        <h2>No matching pairs right now</h2>
+        <p>Try another search phrase to reveal the pair you want to buy or sell.</p>
+    </div>
+</section>

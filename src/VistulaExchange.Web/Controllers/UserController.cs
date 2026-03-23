@@ -1,5 +1,4 @@
 using VistulaExchange.Database.Domain;
-using VistulaExchange.Database.Interface;
 using VistulaExchange.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,33 +7,31 @@ namespace VistulaExchange.Web.Controllers
     public class UserController : Controller
     {
         private readonly IUserService _userService;
-        private readonly IUserRepository _userRepository;
 
-        public UserController(IUserService userService, IUserRepository userRepository)
+        public UserController(IUserService userService)
         {
             _userService = userService;
-            _userRepository = userRepository;
         }
 
         public async Task<IActionResult> Index()
         {
             ViewData["activePage"] = "User";
 
-            var users = await _userRepository.GetAllUsersAsync();
+            var users = await _userService.GetAllUsersAsync();
 
             return View(users);
         }
 
         public async Task<IActionResult> Details(string id)
         {
-            var user = await _userRepository.GetUserByIdAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
 
             return View(user);
         }
 
         public async Task<IActionResult> Delete(string id)
         {
-            var user = await _userRepository.GetUserByIdAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
 
             if (user == null)
             {
@@ -48,14 +45,14 @@ namespace VistulaExchange.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var user = await _userRepository.GetUserByIdAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            await _userRepository.DeleteUserAsync(user);
+            await _userService.DeleteUserAsync(user);
 
             return RedirectToAction(nameof(Index));
         }
@@ -67,7 +64,7 @@ namespace VistulaExchange.Web.Controllers
                 return NotFound();
             }
 
-            var user = await _userRepository.GetUserByIdAsync(id);
+            var user = await _userService.GetUserByIdAsync(id);
 
             if (user == null)
             {

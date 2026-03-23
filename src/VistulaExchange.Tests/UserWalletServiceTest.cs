@@ -1,13 +1,7 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Database.Interface;
-using VistulaExchange.Services.Services;
 using VistulaExchange.Services.Services.Service;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace VistulaExchange.Tests
@@ -16,7 +10,7 @@ namespace VistulaExchange.Tests
     {
 
         [Fact]
-        public void GetCurrencyBalanceById_ReturnsZeroCurrencyAmount_ForNoWalletPosition()
+        public async Task GetCurrencyBalanceByIdAsync_ReturnsZeroCurrencyAmount_ForNoWalletPosition()
         {
             var moqUserWalletRepository = new Mock<IUserWalletRepository>();
 
@@ -27,15 +21,15 @@ namespace VistulaExchange.Tests
                 WalletPositions = new List<WalletPosition>()
             };
 
-            moqUserWalletRepository.Setup(x => x.GetWallet(It.IsAny<string>())).Returns(wallet);
+            moqUserWalletRepository.Setup(x => x.GetWalletAsync(It.IsAny<string>())).ReturnsAsync(wallet);
 
-            var result = newUserWalletService.GetCurrencyBalanceById("1", new Guid());
+            var result = await newUserWalletService.GetCurrencyBalanceByIdAsync("1", new Guid());
 
             Assert.Equal(0, result.CurrencyAmount);
         }
 
         [Fact]
-        public void GetCurrencyBalanceById_ReturnsCurrentsAmount_ForExistingWalletPosition()
+        public async Task GetCurrencyBalanceByIdAsync_ReturnsCurrentsAmount_ForExistingWalletPosition()
         {
             var moqUserWalletRepository = new Mock<IUserWalletRepository>();
 
@@ -59,9 +53,9 @@ namespace VistulaExchange.Tests
                 }
             };
 
-            moqUserWalletRepository.Setup(x => x.GetWallet(It.IsAny<string>())).Returns(wallet);
+            moqUserWalletRepository.Setup(x => x.GetWalletAsync(It.IsAny<string>())).ReturnsAsync(wallet);
 
-            var result = newUserWalletService.GetCurrencyBalanceById("1", guid);
+            var result = await newUserWalletService.GetCurrencyBalanceByIdAsync("1", guid);
 
             Assert.Equal(2.3M , result.CurrencyAmount);
             Assert.Equal(guid, result.Id);

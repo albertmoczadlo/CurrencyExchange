@@ -13,7 +13,8 @@ namespace VistulaExchange.Web.Controllers
         {
             _transactionHistoryService = transactionHistoryService;
         }
-        public IActionResult Index()
+
+        public async Task<IActionResult> Index()
         {
             ViewData["activePage"] = "UserTransactionHistory";
 
@@ -23,7 +24,7 @@ namespace VistulaExchange.Web.Controllers
                 return Challenge();
             }
 
-            var model = _transactionHistoryService.GetUserHistoryByUserId(userID);
+            var model = await _transactionHistoryService.GetUserHistoryByUserIdAsync(userID);
 
             return View(model);
         }

@@ -1,5 +1,4 @@
-using VistulaExchange.Database.Interface;
-using VistulaExchange.Web.Models;
+using VistulaExchange.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -7,27 +6,24 @@ namespace VistulaExchange.Web.Controllers
 {
     public class UserAccountBalance : Controller
     {
-        private readonly IUserWalletRepository _userWalletkRepository;
+        private readonly IUserDashboardService _userDashboardService;
 
-        public UserAccountBalance(IUserWalletRepository userWalletkRepository)
+        public UserAccountBalance(IUserDashboardService userDashboardService)
         {
-            _userWalletkRepository = userWalletkRepository;
+            _userDashboardService = userDashboardService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             ViewData["activePage"] = "AccountBalance";
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Challenge();
+            }
 
-            var userWallet = _userWalletkRepository.GetWallet(userId);
-            var userAccountBalance = userWallet.WalletPositions.ToList()
-                .Select(a => new UserDeposit()
-                {
-                    Currency = a.Currency.ShortName,
-                    Amount = a.CurrencyAmount
-                });
-
-            return View(userAccountBalance);
+            var model = await _userDashboardService.GetDashboardAsync(userId);
+            return View(model);
         }
     }
 }

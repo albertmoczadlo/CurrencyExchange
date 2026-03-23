@@ -1,6 +1,6 @@
 using VistulaExchange.Database.Domain;
-using VistulaExchange.Database.Interface;
 using VistulaExchange.Services.Services.Interfaces;
+using VistulaExchange.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,17 +20,27 @@ namespace VistulaExchange.Web.Controllers
             _exchangeOfficeService = exchangeOfficeService;
             _userAlarmService = userAlarmService;
         }
-        public ActionResult Index()
+
+        public ActionResult Index(string? query)
         {
             ViewData["activePage"] = "AdminExchange";
 
-            var model = _exchangeOfficeBoardService.GetAllCurrencies();
+            var source = string.IsNullOrWhiteSpace(query)
+                ? _exchangeOfficeBoardService.GetAllCurrencies()
+                : _exchangeOfficeBoardService.BrowseCurrency(query.Trim());
 
-            var pln = model.FirstOrDefault(m => string.Equals(m.ShortName, "PLN", StringComparison.OrdinalIgnoreCase));
-            if (pln != null)
+            var model = new ExchangeBoardViewModel
             {
-                model.Remove(pln);
-            }
+                Title = "Trading Desk",
+                Subtitle = "Manage rates, refresh the market feed and steer the spread from one place.",
+                SearchQuery = query?.Trim() ?? string.Empty,
+                IsAdminView = true,
+                Currencies = source
+                    .Where(m => !string.Equals(m.ShortName, "PLN", StringComparison.OrdinalIgnoreCase))
+                    .Select(CurrencyCardViewModel.FromCurrency)
+                    .OrderBy(m => m.ShortName)
+                    .ToList()
+            };
 
             return View(model);
         }

@@ -1,29 +1,30 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Database.Interface;
 
-namespace VistulaExchange.Database.Repositories
+namespace VistulaExchange.Infrastructure.Repositories
 {
     public class TransactionHistoryRepository : ITransactionHistoryRepository
     {
-        private readonly string fileName = "..//..//..//..//TransactionHistory.csv"; 
-        public bool AddTransaction(TransactionHistory transactionHistory)
+        private readonly string fileName = "..//..//..//..//TransactionHistory.csv";
+
+        public async Task<bool> AddTransactionAsync(TransactionHistory transactionHistory)
         {
-            using (StreamWriter file = new StreamWriter(fileName, true))
+            await using (StreamWriter file = new StreamWriter(fileName, true))
             {
-                file.WriteLine($"{transactionHistory.Id};{transactionHistory.UserId};{transactionHistory.CurrencyName};{transactionHistory.Amount};{transactionHistory.DateOfTransaction};{transactionHistory.Description}");
+                await file.WriteLineAsync($"{transactionHistory.Id};{transactionHistory.UserId};{transactionHistory.CurrencyName};{transactionHistory.Amount};{transactionHistory.DateOfTransaction};{transactionHistory.Description}");
             }
 
             return true;
         }
 
-        public List<TransactionHistory> GetAllUsersHistories()
+        public async Task<List<TransactionHistory>> GetAllUsersHistoriesAsync()
         {
             List<TransactionHistory> transactionHistory = new List<TransactionHistory>();
 
             if (!File.Exists(fileName))
                 return new List<TransactionHistory>();
 
-            var transactionHistoryFromFile = File.ReadAllLines(fileName);
+            var transactionHistoryFromFile = await File.ReadAllLinesAsync(fileName);
             foreach (var line in transactionHistoryFromFile)
             {
                 var columns = line.Split(';');
@@ -34,12 +35,12 @@ namespace VistulaExchange.Database.Repositories
             }
             return transactionHistory;
         }
-        public List<TransactionHistory> GetUserHistoryByUserId(string userId)
+
+        public async Task<List<TransactionHistory>> GetUserHistoryByUserIdAsync(string userId)
         {
-            List<TransactionHistory> transactionHistory = GetAllUsersHistories();
+            List<TransactionHistory> transactionHistory = await GetAllUsersHistoriesAsync();
 
-            return transactionHistory.Where(x => String.Equals(x.UserId, userId)).ToList(); 
-
+            return transactionHistory.Where(x => String.Equals(x.UserId, userId)).ToList();
         }
     }
 }

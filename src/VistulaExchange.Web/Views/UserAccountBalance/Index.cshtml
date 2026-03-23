@@ -1,42 +1,274 @@
-@model IEnumerable<VistulaExchange.Web.Models.UserDeposit>
-@{
-    ViewData["Title"] = "User account balance";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-<h2>
-    User account balance
-</h2>
+@model VistulaExchange.Services.Models.UserDashboardDto
+@using System.Text.Json
 
-@if(!Model.Any())
-{
-    <div style="margin: 45px auto; border: 1px solid black; padding: 20px 10px;">
-        <h1>Your Account Balance is empty. Perform Deposit first</h1>
-    </div>
-    <p>
-        <input type="button" value="Deposit" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Index", "UserDeposit" )'" />
-    </p>
+@{
+    ViewData["Title"] = "Portfolio Hub";
+    var marketQuotesJson = JsonSerializer.Serialize(Model.MarketQuotes.Select(quote => new
+    {
+        id = quote.Id,
+        code = quote.CurrencyCode,
+        name = quote.CurrencyName,
+        country = quote.Country,
+        buy = quote.BuyAt,
+        sell = quote.SellAt,
+        spread = quote.Spread
+    }));
 }
-@if(Model.Any())
-{
-    <div class="hero-form pb-3" style="margin: 30px auto; padding: 35px 10px; height: auto;">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th style="width: 15%;">Currency Name</th>
-                    <th style="width: 15%;">Currency Country</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
+
+<section class="workspace-shell"
+         data-watchlist-shell
+         data-market-quotes='@Html.Raw(marketQuotesJson)'>
+    <div class="page-head">
+        <div>
+            <span class="page-head__eyebrow">Client Dashboard</span>
+            <h1>Portfolio hub</h1>
+            <p>Track wallet value, live trends, alerts and the next move from one screen.</p>
+        </div>
+        <div class="page-head__summary">
+            <div class="page-pill">
+                <span>Total wallet value</span>
+                <strong>@Model.TotalValueInPln.ToString("0.00") PLN</strong>
+            </div>
+            <div class="page-pill @(Model.DailyChangeValue >= 0 ? "page-pill--positive" : "page-pill--warning")">
+                <span>Daily move</span>
+                <strong>@Model.DailyChangeValue.ToString("+0.00;-0.00;0.00") PLN</strong>
+            </div>
+            <div class="page-pill">
+                <span>Alerts live</span>
+                <strong>@Model.ActiveAlarms.Count</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-stat-grid hero-stat-grid--dashboard">
+        <article class="hero-stat">
+            <span class="hero-stat__label">Portfolio value</span>
+            <strong class="hero-stat__value">@Model.TotalValueInPln.ToString("0.00") PLN</strong>
+            <span class="hero-stat__hint">Marked to the live desk sell rates.</span>
+        </article>
+        <article class="hero-stat">
+            <span class="hero-stat__label">Daily change</span>
+            <strong class="hero-stat__value">@Model.DailyChangePercent.ToString("+0.00;-0.00;0.00")%</strong>
+            <span class="hero-stat__hint">Equivalent to @Model.DailyChangeValue.ToString("+0.00;-0.00;0.00") PLN vs yesterday.</span>
+        </article>
+        <article class="hero-stat">
+            <span class="hero-stat__label">Latest insight</span>
+            <strong class="hero-stat__value">@(Model.Insights.FirstOrDefault()?.Title ?? "Ready")</strong>
+            <span class="hero-stat__hint">@(Model.Insights.FirstOrDefault()?.Message ?? "Add funds or alerts to activate the full workspace.")</span>
+        </article>
+    </div>
+
+    <div class="workspace-grid">
+        <div class="workspace-main">
+            <section class="dashboard-card dashboard-card--chart"
+                     data-history-shell
+                     data-history-endpoint="@Url.Action("History", "UserExchangeOfficeBoard")"
+                     data-history-default="@Model.DefaultChartCurrencyCode">
+                <div class="dashboard-card__head">
+                    <div>
+                        <span class="page-head__eyebrow">Trend View</span>
+                        <h2>Rate history</h2>
+                        <p>Switch between 7, 30 and 90 day windows for the pairs that matter to your wallet.</p>
+                    </div>
+                    <div class="chart-toolbar">
+                        <select class="chart-toolbar__select" data-history-code>
+                            @foreach (var position in Model.Positions.Where(position => !string.Equals(position.CurrencyCode, "PLN", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                if (position.CurrencyCode == Model.DefaultChartCurrencyCode)
+                                {
+                                    <option value="@position.CurrencyCode" selected>@position.CurrencyCode · @position.CurrencyName</option>
+                                }
+                                else
+                                {
+                                    <option value="@position.CurrencyCode">@position.CurrencyCode · @position.CurrencyName</option>
+                                }
+                            }
+                            @if (!Model.Positions.Any(position => !string.Equals(position.CurrencyCode, "PLN", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                <option value="@Model.DefaultChartCurrencyCode">@Model.DefaultChartCurrencyCode</option>
+                            }
+                        </select>
+                        <div class="segmented-control">
+                            <button type="button" class="segmented-control__button" data-history-days="7">7D</button>
+                            <button type="button" class="segmented-control__button is-active" data-history-days="30">30D</button>
+                            <button type="button" class="segmented-control__button" data-history-days="90">90D</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="history-panel">
+                    <canvas class="history-panel__canvas" data-history-chart></canvas>
+                </div>
+            </section>
+
+            <section class="dashboard-card">
+                <div class="dashboard-card__head">
+                    <div>
+                        <span class="page-head__eyebrow">Wallet Positions</span>
+                        <h2>Holdings snapshot</h2>
+                        <p>See balance, current desk rates and the daily contribution of every position.</p>
+                    </div>
+                    <div class="dashboard-card__actions">
+                        <a class="app-btn app-btn--ghost" asp-controller="UserDeposit" asp-action="Index">Deposit</a>
+                        <a class="app-btn app-btn--primary" asp-controller="UserExchangeOfficeBoard" asp-action="Index">Trade now</a>
+                    </div>
+                </div>
+
+                @if (!Model.Positions.Any())
                 {
-                    <tr>
-                        <td>@item.Currency</td>
-                        <td><div class="hero-form__currency-flag icon-currency-round-@(item.Currency) icon-currency-round-@(item.Currency)-dims" style="position: relative; float: left;"></div></td>
-                        <td>@item.Amount</td>
-                    </tr>
+                    <div class="empty-state empty-state--soft">
+                        <h2>No funds in the wallet yet</h2>
+                        <p>Top up the first currency to unlock the charts, watchlist and trade previews.</p>
+                    </div>
                 }
-            </tbody>
-        </table>
+                else
+                {
+                    <div class="holdings-grid">
+                        @foreach (var position in Model.Positions)
+                        {
+                            <article class="holding-card">
+                                <div class="holding-card__top">
+                                    <div>
+                                        <span class="holding-card__code">@position.CurrencyCode</span>
+                                        <h3>@position.CurrencyName</h3>
+                                    </div>
+                                    <span class="holding-card__value">@position.ValueInPln.ToString("0.00") PLN</span>
+                                </div>
+                                <dl class="holding-card__stats">
+                                    <div>
+                                        <dt>Units</dt>
+                                        <dd>@position.Units.ToString("0.####")</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Sell</dt>
+                                        <dd>@position.CurrentSellRate.ToString("0.0000")</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Daily</dt>
+                                        <dd class="@(position.DailyChangeValue >= 0 ? "u-positive" : "u-warning")">@position.DailyChangeValue.ToString("+0.00;-0.00;0.00") PLN</dd>
+                                    </div>
+                                </dl>
+                                @if (!string.Equals(position.CurrencyCode, "PLN", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <div class="holding-card__actions">
+                                        <a class="market-card__action market-card__action--accent" asp-controller="UserExchangeOfficeBoard" asp-action="Buy" asp-route-id="@Model.MarketQuotes.FirstOrDefault(quote => quote.CurrencyCode == position.CurrencyCode)?.Id">Buy more</a>
+                                        <a class="market-card__action" asp-controller="UserExchangeOfficeBoard" asp-action="Sell" asp-route-id="@Model.MarketQuotes.FirstOrDefault(quote => quote.CurrencyCode == position.CurrencyCode)?.Id">Sell</a>
+                                    </div>
+                                }
+                            </article>
+                        }
+                    </div>
+                }
+            </section>
+
+            <section class="dashboard-card">
+                <div class="dashboard-card__head">
+                    <div>
+                        <span class="page-head__eyebrow">Recent Activity</span>
+                        <h2>Transactions feed</h2>
+                        <p>The latest wallet moves and exchange events in one timeline.</p>
+                    </div>
+                    <a class="app-btn app-btn--ghost" asp-controller="UserTransactionHistory" asp-action="Index">Open full history</a>
+                </div>
+
+                @if (!Model.RecentTransactions.Any())
+                {
+                    <p class="dashboard-card__empty-copy">No transactions recorded yet. Your first deposit or trade will land here instantly.</p>
+                }
+                else
+                {
+                    <div class="activity-feed">
+                        @foreach (var item in Model.RecentTransactions)
+                        {
+                            <article class="activity-row">
+                                <div class="activity-row__meta">
+                                    <span class="activity-row__title">@item.Description</span>
+                                    <span class="activity-row__date">@item.DateOfTransaction.ToString("dd MMM yyyy, HH:mm")</span>
+                                </div>
+                                <div class="activity-row__amount">
+                                    <strong>@item.Amount.ToString("0.##") @item.CurrencyCode</strong>
+                                    <span>@(string.IsNullOrWhiteSpace(item.UserEmail) ? "Workspace event" : item.UserEmail)</span>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                }
+            </section>
+        </div>
+
+        <aside class="workspace-sidebar">
+            <section class="dashboard-card">
+                <div class="dashboard-card__head">
+                    <div>
+                        <span class="page-head__eyebrow">Insight Center</span>
+                        <h2>Notifications in app</h2>
+                    </div>
+                </div>
+
+                <div class="insight-stack">
+                    @foreach (var insight in Model.Insights)
+                    {
+                        <article class="insight-tile insight-tile--@insight.Tone">
+                            <span class="insight-tile__icon"><i class="@insight.Icon"></i></span>
+                            <div>
+                                <strong>@insight.Title</strong>
+                                <p>@insight.Message</p>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <section class="dashboard-card dashboard-card--watchlist">
+                <div class="dashboard-card__head">
+                    <div>
+                        <span class="page-head__eyebrow">Watchlist</span>
+                        <h2>Favourite currencies</h2>
+                    </div>
+                </div>
+                <div class="watchlist-panel" data-watchlist-root>
+                    <p class="dashboard-card__empty-copy">Use the star buttons on the live board to pin your market watchlist here.</p>
+                </div>
+            </section>
+
+            <section class="dashboard-card">
+                <div class="dashboard-card__head">
+                    <div>
+                        <span class="page-head__eyebrow">Alert Center</span>
+                        <h2>Active rate alarms</h2>
+                    </div>
+                    <a class="app-btn app-btn--ghost" asp-controller="UserAlarm" asp-action="Index">Manage alerts</a>
+                </div>
+
+                @if (!Model.ActiveAlarms.Any())
+                {
+                    <p class="dashboard-card__empty-copy">No active alerts yet. Create one to start tracking a price target.</p>
+                }
+                else
+                {
+                    <div class="alarm-stack">
+                        @foreach (var alarm in Model.ActiveAlarms)
+                        {
+                            <article class="alarm-row">
+                                <div class="alarm-row__head">
+                                    <strong>@alarm.CurrencyCode</strong>
+                                    <span>@alarm.Status</span>
+                                </div>
+                                <dl class="alarm-row__stats">
+                                    <div>
+                                        <dt>Buy target</dt>
+                                        <dd>@(alarm.AlarmBuyAt > 0 ? alarm.AlarmBuyAt.ToString("0.0000") : "—")</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Sell target</dt>
+                                        <dd>@(alarm.AlarmSellAt > 0 ? alarm.AlarmSellAt.ToString("0.0000") : "—")</dd>
+                                    </div>
+                                </dl>
+                            </article>
+                        }
+                    </div>
+                }
+            </section>
+        </aside>
     </div>
-}
+</section>

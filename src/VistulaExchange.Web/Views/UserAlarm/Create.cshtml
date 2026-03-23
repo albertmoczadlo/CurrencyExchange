@@ -1,57 +1,89 @@
 @model VistulaExchange.Database.Domain.UserAlarm
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create alert";
     var currencies = ViewData["currencies"] as IEnumerable<string> ?? Array.Empty<string>();
+    var currencyRates = ViewData["currencyRates"] as string ?? "[]";
 }
 
-<script>
-    function getValDeposit(selection) {
-        document.getElementById('divDeposit').className = "hero-form__currency-flag icon-currency-round-" + selection.value + " icon-currency-round-" + selection.value + "-dims";
-    }
-</script>
+<section class="workspace-shell">
+    <div class="page-head">
+        <div>
+            <span class="page-head__eyebrow">Alert Builder</span>
+            <h1>Create a smart rate alert</h1>
+            <p>Use direct targets or percentage presets to set up an alert without doing desk math manually.</p>
+        </div>
+    </div>
 
-<h1>Create</h1>
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="CreateAlarm">
-            <div class="form-group">
-                <div>Alarm for Currency:</div>
-                <div class="hero-form__dropdown-holder clearfix">
-                    <div class="bem-select-dropdown ">
-                        <div id="divDeposit" class="hero-form__currency-flag icon-currency-round-PLN icon-currency-round-PLN-dims" style="margin-left: 5px;"></div>
-                        <select asp-for="ShortName" name="ShortName" onchange="getValDeposit(this)" class="form-select" style="height: 47px;width: 105px;text-align: right;font-weight: bold;">
-                            @foreach (var item in currencies)
-                            {
-                                if (item == "PLN")
-                                {
-                                    <option selected="selected" value="@item">@item</option>
-                                }
-                                else
-                                {
-                                    <option value="@item">@item</option>
-                                }
-
-                            }
-
-                        </select>
-                    </div>
+    <div class="trade-grid">
+        <form asp-action="CreateAlarm"
+              method="post"
+              class="dashboard-card trade-form"
+              data-alert-editor
+              data-alert-rates='@Html.Raw(currencyRates)'>
+            <div class="dashboard-card__head">
+                <div>
+                    <span class="page-head__eyebrow">Target Setup</span>
+                    <h2>Thresholds</h2>
                 </div>
             </div>
-            <div class="form-group">
-                <label asp-for="AlarmSellAt" class="control-label"></label>
-                <input asp-for="AlarmSellAt" class="form-control" />
-                <span asp-validation-for="AlarmSellAt" class="text-danger"></span>
+
+            <div class="trade-input-group">
+                <label asp-for="ShortName">Currency</label>
+                <select asp-for="ShortName" class="form-select" data-alert-code>
+                    @foreach (var item in currencies)
+                    {
+                        <option value="@item">@item</option>
+                    }
+                </select>
             </div>
-            <div class="form-group">
-                <label asp-for="AlarmBuyAt" class="control-label"></label>
-                <input asp-for="AlarmBuyAt" class="form-control" />
-                <span asp-validation-for="AlarmBuyAt" class="text-danger"></span>
+
+            <div class="trade-input-group">
+                <label asp-for="AlarmBuyAt">Buy target</label>
+                <input asp-for="AlarmBuyAt" class="form-control" type="number" step="0.0001" min="0" data-alert-buy />
+                <small>Trigger when the desk buy rate falls to this level or lower.</small>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-warning" />
-                <input type="button" value="Back to List" class="btn btn-outline-secondary btn-sm align-text-bottom" onclick="location.href='@Url.Action("Index", "UserAlarm" )'" />
+
+            <div class="trade-input-group">
+                <label asp-for="AlarmSellAt">Sell target</label>
+                <input asp-for="AlarmSellAt" class="form-control" type="number" step="0.0001" min="0" data-alert-sell />
+                <small>Trigger when the desk sell rate rises to this level or higher.</small>
+            </div>
+
+            <div class="trade-actions">
+                <button type="submit" class="app-btn app-btn--primary">Save alert</button>
+                <a class="app-btn app-btn--ghost" asp-action="Index">Back</a>
             </div>
         </form>
+
+        <aside class="dashboard-card trade-summary">
+            <div class="dashboard-card__head">
+                <div>
+                    <span class="page-head__eyebrow">Preset Assistant</span>
+                    <h2>Quick presets</h2>
+                </div>
+            </div>
+
+            <dl class="trade-summary__stats">
+                <div>
+                    <dt>Current buy</dt>
+                    <dd data-alert-current-buy>0.0000</dd>
+                </div>
+                <div>
+                    <dt>Current sell</dt>
+                    <dd data-alert-current-sell>0.0000</dd>
+                </div>
+            </dl>
+
+            <div class="preset-grid">
+                <button type="button" class="preset-chip" data-alert-preset="buy" data-alert-percent="1">Buy dip 1%</button>
+                <button type="button" class="preset-chip" data-alert-preset="buy" data-alert-percent="2">Buy dip 2%</button>
+                <button type="button" class="preset-chip" data-alert-preset="sell" data-alert-percent="1">Sell spike 1%</button>
+                <button type="button" class="preset-chip" data-alert-preset="sell" data-alert-percent="2">Sell spike 2%</button>
+                <button type="button" class="preset-chip" data-alert-preset="sell" data-alert-percent="5">Sell spike 5%</button>
+            </div>
+
+            <p class="trade-summary__foot">Presets translate percentage moves into exact desk thresholds and drop them straight into the form.</p>
+        </aside>
     </div>
-</div>
+</section>

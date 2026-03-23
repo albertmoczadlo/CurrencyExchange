@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using VistulaExchange.Database.Domain;
-using VistulaExchange.Database.Interface;
 using VistulaExchange.Services.Services.Interfaces;
 using VistulaExchange.Web.Models;
+using System.Text.Json;
 
 namespace VistulaExchange.Web.Controllers
 {
@@ -11,129 +11,140 @@ namespace VistulaExchange.Web.Controllers
     {
         private readonly IExchangeOfficeBoardService _exchangeOfficeBoardService;
         private readonly IUserWalletService _userWalletService;
-        private readonly IAvailableMoneyOnStockRepository _availableMoneyOnStockRepository;
+        private readonly IAvailableMoneyOnStockService _availableMoneyOnStockService;
+        private readonly ITradeQuoteService _tradeQuoteService;
+        private readonly INbpJsonService _nbpJsonService;
 
         public UserExchangeOfficeBoardController(
             IExchangeOfficeBoardService exchangeOfficeBoardService,
             IUserWalletService userWalletService,
-            IAvailableMoneyOnStockRepository availableMoneyOnStockRepository)
+            IAvailableMoneyOnStockService availableMoneyOnStockService,
+            ITradeQuoteService tradeQuoteService,
+            INbpJsonService nbpJsonService)
         {
             _exchangeOfficeBoardService = exchangeOfficeBoardService;
             _userWalletService = userWalletService;
-            _availableMoneyOnStockRepository = availableMoneyOnStockRepository;
+            _availableMoneyOnStockService = availableMoneyOnStockService;
+            _tradeQuoteService = tradeQuoteService;
+            _nbpJsonService = nbpJsonService;
         }
 
-        public ActionResult Index()
+        public ActionResult Index(string? query)
         {
             ViewData["activePage"] = "UserExchangeOfficeBoard";
 
-            var model = _exchangeOfficeBoardService.GetAllCurrencies();
-            var pln = model.FirstOrDefault(m => string.Equals(m.ShortName, "PLN", StringComparison.OrdinalIgnoreCase));
-            if (pln != null)
+            var source = string.IsNullOrWhiteSpace(query)
+                ? _exchangeOfficeBoardService.GetAllCurrencies()
+                : _exchangeOfficeBoardService.BrowseCurrency(query.Trim());
+
+            var model = new ExchangeBoardViewModel
             {
-                model.Remove(pln);
-            }
+                Title = "Live Exchange Board",
+                Subtitle = "Scan the market, compare spreads and jump straight into buy or sell workflows.",
+                SearchQuery = query?.Trim() ?? string.Empty,
+                IsAdminView = false,
+                Currencies = source
+                    .Where(m => !string.Equals(m.ShortName, "PLN", StringComparison.OrdinalIgnoreCase))
+                    .Select(CurrencyCardViewModel.FromCurrency)
+                    .OrderBy(m => m.ShortName)
+                    .ToList()
+            };
 
             return View(model);
         }
 
         public ActionResult Details(Guid id)
         {
+            ViewData["activePage"] = "UserExchangeOfficeBoard";
             var currency = _exchangeOfficeBoardService.GetCurrencyById(id);
-            return View(currency);
+            if (currency is null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(new CurrencyDetailsViewModel
+            {
+                Id = currency.Id,
+                Name = currency.Name,
+                ShortName = currency.ShortName,
+                Country = currency.Country,
+                BuyAt = currency.BuyAt,
+                SellAt = currency.SellAt
+            });
         }
 
-        public ActionResult Buy(Guid id)
+        [HttpGet]
+        public async Task<ActionResult> Buy(Guid id)
         {
-            var currency = _exchangeOfficeBoardService.GetCurrencyById(id);
-            var exchangeFromCurrency = _exchangeOfficeBoardService
-                .GetAllCurrencies()
-                .FirstOrDefault(c => string.Equals(c.ShortName, "PLN", StringComparison.OrdinalIgnoreCase));
+            ViewData["activePage"] = "UserExchangeOfficeBoard";
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Challenge();
             }
 
-            if (currency == null || exchangeFromCurrency == null)
+            var quote = await _tradeQuoteService.BuildQuoteAsync(userId, id, "Buy");
+            if (quote is null)
             {
                 return RedirectToAction(nameof(Index));
             }
 
-            var exchangeFromCurrencyAmount =
-                _userWalletService.GetCurrencyBalanceById(userId, exchangeFromCurrency.Id)?.CurrencyAmount ?? 0m;
-
-            var userExchange = new UserExchange
-            {
-                ExchangeFromCurrency = exchangeFromCurrency.ShortName,
-                ExchangeFromCurrencyAmount = exchangeFromCurrencyAmount,
-                ExchangeToCurrency = currency.ShortName,
-                ExchangeToCurrencyAmount = 0,
-                BuyAt = currency.BuyAt,
-                SellAt = currency.SellAt,
-                ExchangeMaxAmount = exchangeFromCurrencyAmount / currency.BuyAt
-            };
-
-            return View(userExchange);
+            return View(MapQuote(quote));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Buy(UserExchange userExchange)
+        public async Task<ActionResult> Buy(QuickExchangeViewModel model)
         {
-            if (userExchange.ExchangeToCurrencyAmount > userExchange.ExchangeMaxAmount)
-            {
-                ViewData["errorMessage"] = "Requested currency buy amount larger than current saldo.";
-                ViewData["currentBalance"] = userExchange.ExchangeMaxAmount;
-                return View("Buy", userExchange);
-            }
-
-            var result = _availableMoneyOnStockRepository.SubtractMoneyFromStock(new MoneyOnStock
-            {
-                CurrencyName = userExchange.ExchangeToCurrency,
-                Value = userExchange.ExchangeToCurrencyAmount
-            });
-
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-                ViewData["errorMessage"] = result;
-                ViewData["currentBalance"] = userExchange.ExchangeMaxAmount;
-                return View("Buy", userExchange);
-            }
-
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
                 return Challenge();
             }
 
-            _userWalletService.Withdrawal(userId, userExchange.ExchangeFromCurrency, userExchange.ExchangeToCurrencyAmount * userExchange.BuyAt, "Buy");
-            _userWalletService.Deposit(userId, userExchange.ExchangeToCurrency, userExchange.ExchangeToCurrencyAmount, "Buy");
-
-            var exchangeFromCurrency = _exchangeOfficeBoardService
-                .GetAllCurrencies()
-                .FirstOrDefault(c => string.Equals(c.ShortName, userExchange.ExchangeFromCurrency, StringComparison.OrdinalIgnoreCase));
-            if (exchangeFromCurrency == null)
+            if (model.QuoteExpired)
             {
-                return RedirectToAction(nameof(Index));
+                return await ReturnBuyErrorAsync(userId, model, "Quote lock expired. Refresh the deal to get a fresh rate.");
             }
 
-            var newBalance = _userWalletService.GetCurrencyBalanceById(userId, exchangeFromCurrency.Id)?.CurrencyAmount ?? 0m;
+            if (model.RequestedAmount <= 0 || model.RequestedAmount > model.MaxAmount)
+            {
+                return await ReturnBuyErrorAsync(userId, model, "Requested amount is above the available balance or desk liquidity.");
+            }
+
+            var subtractResult = await _availableMoneyOnStockService.SubtractMoneyFromStockAsync(new MoneyOnStock
+            {
+                CurrencyName = model.TargetCurrencyCode,
+                Value = model.RequestedAmount
+            });
+
+            if (!string.IsNullOrWhiteSpace(subtractResult))
+            {
+                return await ReturnBuyErrorAsync(userId, model, subtractResult);
+            }
+
+            await _availableMoneyOnStockService.AddMoneyToStockAsync(new MoneyOnStock
+            {
+                CurrencyName = model.SourceCurrencyCode,
+                Value = model.NetValue
+            });
+
+            await _userWalletService.WithdrawalAsync(userId, model.SourceCurrencyCode, model.NetValue, "Buy");
+            await _userWalletService.DepositAsync(userId, model.TargetCurrencyCode, model.RequestedAmount, "Buy");
+
+            var newBalance = (await _userWalletService.GetCurrencyBalanceByCodeAsync(userId, model.SourceCurrencyCode)).CurrencyAmount;
 
             ViewData["currentSaldo"] = newBalance;
-            ViewData["currency"] = userExchange.ExchangeFromCurrency;
+            ViewData["currency"] = model.SourceCurrencyCode;
             ViewData["activePage"] = "UserBuy";
 
             return View("BuyCompleted");
         }
 
-        public ActionResult Sell(Guid id)
+        [HttpGet]
+        public async Task<ActionResult> Sell(Guid id)
         {
-            var currency = _exchangeOfficeBoardService
-                .GetAllCurrencies()
-                .FirstOrDefault(c => string.Equals(c.ShortName, "PLN", StringComparison.OrdinalIgnoreCase));
-            var exchangeFromCurrency = _exchangeOfficeBoardService.GetCurrencyById(id);
+            ViewData["activePage"] = "UserExchangeOfficeBoard";
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
@@ -141,61 +152,138 @@ namespace VistulaExchange.Web.Controllers
                 return Challenge();
             }
 
-            if (currency == null || exchangeFromCurrency == null)
+            var quote = await _tradeQuoteService.BuildQuoteAsync(userId, id, "Sell");
+            if (quote is null)
             {
                 return RedirectToAction(nameof(Index));
             }
 
-            var exchangeFromCurrencyAmount = _userWalletService.GetCurrencyBalanceById(userId, id)?.CurrencyAmount ?? 0m;
-
-            var userExchange = new UserExchange
-            {
-                ExchangeFromCurrency = exchangeFromCurrency.ShortName,
-                ExchangeFromCurrencyAmount = exchangeFromCurrencyAmount,
-                ExchangeToCurrency = currency.ShortName,
-                ExchangeToCurrencyAmount = _userWalletService.GetCurrencyBalanceById(userId, currency.Id)?.CurrencyAmount ?? 0m,
-                BuyAt = currency.BuyAt,
-                SellAt = currency.SellAt,
-                ExchangeMaxAmount = exchangeFromCurrencyAmount
-            };
-
-            return View(userExchange);
+            return View(MapQuote(quote));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Sell(UserExchange userExchange)
+        public async Task<ActionResult> Sell(QuickExchangeViewModel model)
         {
-            if (userExchange.ExchangeFromCurrencyAmount > userExchange.ExchangeMaxAmount)
-            {
-                ViewData["errorMessage"] = "Requested currency buy amount larger than current saldo.";
-                ViewData["currentBalance"] = userExchange.ExchangeMaxAmount;
-                return View("Sell", userExchange);
-            }
-
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
                 return Challenge();
             }
 
-            _userWalletService.Withdrawal(userId, userExchange.ExchangeFromCurrency, userExchange.ExchangeFromCurrencyAmount, "Sell");
-            _userWalletService.Deposit(userId, userExchange.ExchangeToCurrency, userExchange.ExchangeFromCurrencyAmount * userExchange.SellAt, "Sell");
+            if (model.QuoteExpired)
+            {
+                return await ReturnSellErrorAsync(userId, model, "Quote lock expired. Refresh the deal to get a fresh rate.");
+            }
 
-            var exchangeToCurrency = _exchangeOfficeBoardService
-                .GetAllCurrencies()
-                .FirstOrDefault(c => string.Equals(c.ShortName, userExchange.ExchangeToCurrency, StringComparison.OrdinalIgnoreCase));
-            if (exchangeToCurrency == null)
+            if (model.RequestedAmount <= 0 || model.RequestedAmount > model.MaxAmount)
+            {
+                return await ReturnSellErrorAsync(userId, model, "Requested amount is above the available balance or desk liquidity.");
+            }
+
+            var subtractResult = await _availableMoneyOnStockService.SubtractMoneyFromStockAsync(new MoneyOnStock
+            {
+                CurrencyName = model.TargetCurrencyCode,
+                Value = model.NetValue
+            });
+
+            if (!string.IsNullOrWhiteSpace(subtractResult))
+            {
+                return await ReturnSellErrorAsync(userId, model, subtractResult);
+            }
+
+            await _availableMoneyOnStockService.AddMoneyToStockAsync(new MoneyOnStock
+            {
+                CurrencyName = model.SourceCurrencyCode,
+                Value = model.RequestedAmount
+            });
+
+            await _userWalletService.WithdrawalAsync(userId, model.SourceCurrencyCode, model.RequestedAmount, "Sell");
+            await _userWalletService.DepositAsync(userId, model.TargetCurrencyCode, model.NetValue, "Sell");
+
+            var newBalance = (await _userWalletService.GetCurrencyBalanceByCodeAsync(userId, model.TargetCurrencyCode)).CurrencyAmount;
+            ViewData["currentSaldo"] = newBalance;
+            ViewData["currency"] = model.TargetCurrencyCode;
+            ViewData["activePage"] = "UserSell";
+
+            return View("SellCompleted");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> History(string currencyCode, int days = 30)
+        {
+            var safeDays = Math.Clamp(days, 7, 90);
+            var safeCode = (currencyCode ?? string.Empty).Trim().ToUpperInvariant();
+            if (string.IsNullOrWhiteSpace(safeCode))
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                var history = await _nbpJsonService.GetCurrencyHistoryAsync(safeCode, safeDays);
+                return Json(history.Select(point => new
+                {
+                    date = point.Date.ToString("yyyy-MM-dd"),
+                    buyAt = point.BuyAt,
+                    sellAt = point.SellAt
+                }));
+            }
+            catch
+            {
+                return Json(Array.Empty<object>());
+            }
+        }
+
+        private async Task<ActionResult> ReturnBuyErrorAsync(string userId, QuickExchangeViewModel model, string errorMessage)
+        {
+            ViewData["activePage"] = "UserExchangeOfficeBoard";
+            var refreshedQuote = await _tradeQuoteService.BuildQuoteAsync(userId, model.CurrencyId, "Buy", model.RequestedAmount);
+            if (refreshedQuote is null)
             {
                 return RedirectToAction(nameof(Index));
             }
 
-            var newBalance = _userWalletService.GetCurrencyBalanceById(userId, exchangeToCurrency.Id)?.CurrencyAmount ?? 0m;
-            ViewData["currentSaldo"] = newBalance;
-            ViewData["currency"] = userExchange.ExchangeToCurrency;
-            ViewData["activePage"] = "UserSell";
+            var viewModel = MapQuote(refreshedQuote);
+            viewModel.ErrorMessage = errorMessage;
+            return View("Buy", viewModel);
+        }
 
-            return View("SellCompleted");
+        private async Task<ActionResult> ReturnSellErrorAsync(string userId, QuickExchangeViewModel model, string errorMessage)
+        {
+            ViewData["activePage"] = "UserExchangeOfficeBoard";
+            var refreshedQuote = await _tradeQuoteService.BuildQuoteAsync(userId, model.CurrencyId, "Sell", model.RequestedAmount);
+            if (refreshedQuote is null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var viewModel = MapQuote(refreshedQuote);
+            viewModel.ErrorMessage = errorMessage;
+            return View("Sell", viewModel);
+        }
+
+        private static QuickExchangeViewModel MapQuote(VistulaExchange.Services.Models.TradeQuoteDto quote)
+        {
+            return new QuickExchangeViewModel
+            {
+                CurrencyId = quote.CurrencyId,
+                CurrencyName = quote.CurrencyName,
+                Mode = quote.Mode,
+                SourceCurrencyCode = quote.SourceCurrencyCode,
+                TargetCurrencyCode = quote.TargetCurrencyCode,
+                SourceBalance = quote.SourceBalance,
+                TargetBalance = quote.TargetBalance,
+                RequestedAmount = quote.RequestedAmount,
+                MaxAmount = quote.MaxAmount,
+                Rate = quote.Rate,
+                FeeRate = quote.FeeRate,
+                GrossValue = quote.GrossValue,
+                FeeAmount = quote.FeeAmount,
+                NetValue = quote.NetValue,
+                TargetLiquidityAvailable = quote.TargetLiquidityAvailable,
+                QuoteLockedUntilUtc = quote.QuoteLockedUntilUtc
+            };
         }
     }
 }

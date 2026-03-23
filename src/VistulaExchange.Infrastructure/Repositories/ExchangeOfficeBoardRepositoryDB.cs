@@ -1,8 +1,8 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Database.Interface;
-using VistulaExchange.Web.Areas.Identity.Data;
+using VistulaExchange.Infrastructure.Persistence;
 
-namespace VistulaExchange.Database.Repositories
+namespace VistulaExchange.Infrastructure.Repositories
 {
     public class ExchangeOfficeBoardRepositoryDB : IExchangeOfficeBoardRepository
     {

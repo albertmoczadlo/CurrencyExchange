@@ -13,11 +13,12 @@ namespace VistulaExchange.Web.Controllers
         {
             _transactionHistoryService = transactionHistoryService;
         }
-        public IActionResult Index()
+
+        public async Task<IActionResult> Index()
         {
             ViewData["activePage"] = "AdminTransactionHistory";
 
-            var model = _transactionHistoryService.GetAllUsersHistories();
+            var model = await _transactionHistoryService.GetAllUsersHistoriesAsync();
 
             return View(model);
 

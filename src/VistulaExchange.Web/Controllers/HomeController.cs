@@ -18,37 +18,29 @@ namespace VistulaExchange.Web.Controllers
 
         public IActionResult Index()
         {
-            var allCurrencies = _exchangeOfficeBoardService.GetAllCurrencies();
+            ViewData["activePage"] = "Home";
 
-            var euro = allCurrencies.Where(a => a.ShortName == "EUR").FirstOrDefault();
-            if(euro != null)
+            var currencies = _exchangeOfficeBoardService
+                .GetAllCurrencies()
+                .Where(a => !string.Equals(a.ShortName, "PLN", StringComparison.OrdinalIgnoreCase))
+                .Select(CurrencyCardViewModel.FromCurrency)
+                .OrderBy(a => a.ShortName)
+                .ToList();
+
+            var model = new HomeDashboardViewModel
             {
-                ViewData["EUR_sell"] = euro.SellAt;
-                ViewData["EUR_buy"] = euro.BuyAt;
-            }
+                Currencies = currencies,
+                SpotlightCurrencies = currencies.Take(4).ToList(),
+                BestBuyCurrency = currencies.OrderBy(a => a.BuyAt).FirstOrDefault(),
+                BestSellCurrency = currencies.OrderByDescending(a => a.SellAt).FirstOrDefault(),
+                TightestSpreadCurrency = currencies.OrderBy(a => a.Spread).FirstOrDefault(),
+                AverageSpread = currencies.Count > 0 ? Math.Round(currencies.Average(a => a.Spread), 4) : 0m,
+                IsAuthenticated = User.Identity?.IsAuthenticated == true,
+                IsAdmin = User.IsInRole("Admin"),
+                UserDisplayName = User.Identity?.Name ?? string.Empty
+            };
 
-            var dolar = allCurrencies.Where(a => a.ShortName == "USD").FirstOrDefault();
-            if(dolar != null)
-            {
-                ViewData["USD_sell"] = dolar.SellAt;
-                ViewData["USD_buy"] = dolar.BuyAt;
-            }
-
-            var frank = allCurrencies.Where(a => a.ShortName == "CHF").FirstOrDefault();
-            if(frank != null)
-            {
-                ViewData["CHF_sell"] = frank.SellAt;
-                ViewData["CHF_buy"] = frank.BuyAt;
-            }
-
-            var funt = allCurrencies.Where(a => a.ShortName == "GBP").FirstOrDefault();
-            if(funt != null)
-            {
-                ViewData["GBP_sell"] = funt.SellAt;
-                ViewData["GBP_buy"] = funt.BuyAt;
-            }
-
-            return View();
+            return View(model);
         }
 
         public IActionResult Privacy()

@@ -1,42 +1,52 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Database.Interface;
-using VistulaExchange.Web.Areas.Identity.Data;
+using VistulaExchange.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace VistulaExchange.Database.Repositories
+namespace VistulaExchange.Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly VistulaExchangeDbContext _jediAppDb;
+        private readonly VistulaExchangeDbContext _dbContext;
 
-        public UserRepository(VistulaExchangeDbContext jediAppDb)
+        public UserRepository(VistulaExchangeDbContext dbContext)
         {
-            _jediAppDb = jediAppDb;
+            _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IReadOnlyList<User>> GetAllUsersAsync()
         {
-            var users = await _jediAppDb.Users.ToListAsync();
+            var users = await _dbContext.Users.ToListAsync();
 
             return users;
         }
 
+        public Task<int> GetUsersCountAsync()
+        {
+            return _dbContext.Users.CountAsync();
+        }
+
+        public Task<int> GetConfirmedUsersCountAsync()
+        {
+            return _dbContext.Users.CountAsync(x => x.EmailConfirmed);
+        }
+
         public async Task<User> GetUserByIdAsync(string id)
         {
-            var user = await _jediAppDb.Users.FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
             return user;
         }
 
         public async Task DeleteUserAsync(User user)
         {
-            _jediAppDb.Remove(user);
+            _dbContext.Remove(user);
 
-            await _jediAppDb.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<User> UpdateUserAsync(User user)
         {
-            var userToUpdate = await _jediAppDb.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
+            var userToUpdate = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
 
             if (userToUpdate is null)
             {
@@ -50,7 +60,7 @@ namespace VistulaExchange.Database.Repositories
             userToUpdate.NormalizedUserName = user.UserName?.ToUpperInvariant();
             userToUpdate.NormalizedEmail = user.Email?.ToUpperInvariant();
 
-            await _jediAppDb.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
             return userToUpdate;
         }

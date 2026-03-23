@@ -1,6 +1,6 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Database.Interface;
-using VistulaExchange.Web.Areas.Identity.Data;
+using VistulaExchange.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace VistulaExchange.Infrastructure.Repositories

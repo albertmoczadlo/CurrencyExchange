@@ -1,6 +1,6 @@
 // See https://aka.ms/new-console-template for more information
 using VistulaExchange.Database.Domain;
-using VistulaExchange.Database.Repositories;
+using VistulaExchange.Infrastructure.Repositories;
 using VistulaExchange.Services.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

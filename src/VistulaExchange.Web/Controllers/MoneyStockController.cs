@@ -1,4 +1,5 @@
-using VistulaExchange.Database.Interface;
+using VistulaExchange.Database.Domain;
+using VistulaExchange.Services.Services.Interfaces;
 using VistulaExchange.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,18 +7,18 @@ namespace VistulaExchange.Web.Controllers
 {
     public class MoneyStockController : Controller
     {
-        private readonly IAvailableMoneyOnStockRepository _availableMoneyOnStockRepository;
+        private readonly IAvailableMoneyOnStockService _availableMoneyOnStockService;
 
-        public MoneyStockController(IAvailableMoneyOnStockRepository availableMoneyOnStockRepository)
+        public MoneyStockController(IAvailableMoneyOnStockService availableMoneyOnStockService)
         {
-            _availableMoneyOnStockRepository = availableMoneyOnStockRepository;
+            _availableMoneyOnStockService = availableMoneyOnStockService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             ViewData["activePage"] = "MoneyStock";
 
-            var moneyOnStock = _availableMoneyOnStockRepository.GetAvailableMoneyOnStock()
+            var moneyOnStock = (await _availableMoneyOnStockService.GetAvailableMoneyOnStockAsync())
                 .Select(a => new AdminDeposit
                 {
                     Currency = a.CurrencyName,
@@ -34,17 +35,17 @@ namespace VistulaExchange.Web.Controllers
             return View("Deposit");
         }
 
-        public IActionResult Deposit(AdminDeposit adminDeposit)
+        public async Task<IActionResult> Deposit(AdminDeposit adminDeposit)
         {
-            var depositDetails = new Database.Domain.MoneyOnStock()
+            var depositDetails = new MoneyOnStock
             {
                 CurrencyName = adminDeposit.Currency,
                 Value = adminDeposit.Amount
             };
 
-            _availableMoneyOnStockRepository.AddMoneyToStock(depositDetails);
+            await _availableMoneyOnStockService.AddMoneyToStockAsync(depositDetails);
 
-            var moneyOnStock = _availableMoneyOnStockRepository.GetAvailableMoneyOnStock();
+            var moneyOnStock = await _availableMoneyOnStockService.GetAvailableMoneyOnStockAsync();
             var currentSaldo = moneyOnStock.SingleOrDefault(a => a.CurrencyName == adminDeposit.Currency);
 
             ViewData["currentSaldo"] = currentSaldo?.Value ?? 0;

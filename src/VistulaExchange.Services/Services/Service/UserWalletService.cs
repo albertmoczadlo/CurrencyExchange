@@ -13,11 +13,17 @@ namespace VistulaExchange.Services.Services.Service
             _userWalletRepository = userWalletRepository;
         }
 
-        public WalletPosition GetCurrencyBalanceById(string userId, Guid currencyId)
+        public Task<Wallet> GetWalletAsync(string userId)
         {
-            var wallet = _userWalletRepository.GetWallet(userId);
+            return _userWalletRepository.GetWalletAsync(userId);
+        }
 
-            var currencyAmount = wallet.WalletPositions.Where(a => a.Currency.Id == currencyId).FirstOrDefault();
+        public async Task<WalletPosition> GetCurrencyBalanceByIdAsync(string userId, Guid currencyId)
+        {
+            var wallet = await _userWalletRepository.GetWalletAsync(userId);
+
+            var currencyAmount = wallet.WalletPositions?
+                .FirstOrDefault(a => a.Currency.Id == currencyId);
 
             if (currencyAmount is null)
             {
@@ -31,14 +37,23 @@ namespace VistulaExchange.Services.Services.Service
             return currencyAmount;
         }
 
-        public void Withdrawal(string userId, string currencyCode, decimal withdrawalAmount, string description)
+        public async Task<WalletPosition> GetCurrencyBalanceByCodeAsync(string userId, string currencyCode)
         {
-            _userWalletRepository.Withdrawal(userId, currencyCode, withdrawalAmount, description);
+            var wallet = await _userWalletRepository.GetWalletAsync(userId);
+
+            return wallet.WalletPositions?
+                .FirstOrDefault(a => string.Equals(a.Currency.ShortName, currencyCode, StringComparison.OrdinalIgnoreCase))
+                ?? new WalletPosition();
         }
 
-        public void Deposit(string userId, string currencyCode, decimal depositAmount, string description)
+        public Task WithdrawalAsync(string userId, string currencyCode, decimal withdrawalAmount, string description)
         {
-            _userWalletRepository.Deposit(userId, currencyCode, depositAmount, description);
+            return _userWalletRepository.WithdrawalAsync(userId, currencyCode, withdrawalAmount, description);
+        }
+
+        public Task DepositAsync(string userId, string currencyCode, decimal depositAmount, string description)
+        {
+            return _userWalletRepository.DepositAsync(userId, currencyCode, depositAmount, description);
         }
     }
 }

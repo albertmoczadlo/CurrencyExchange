@@ -1,55 +1,120 @@
-@model VistulaExchange.Web.Models.UserExchange
+@model VistulaExchange.Web.Models.QuickExchangeViewModel
+
 @{
-    ViewData["Title"] = "UserBuy";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Quick Buy";
 }
 
-<h2>
-    Buy
-</h2>
-
-<form asp-controller="UserExchangeOfficeBoard" asp-action="Buy" method="post" accept-charset="utf-8">
-    <div class="hero-form" style="width: 705px; height: 140px; margin: 50px auto;">
-        <div class="hero-form__section for-first-step">
-            <div class="hero-form__section-inner for-step-1">
-                <div class="hero-form__fields-with-connector">
-                    <div class="hero-form__input-block ">
-                        <div class="hero-form__input-block-label">
-                            <div class="hero-form__input-block-label-text">Balance: @Model.ExchangeFromCurrencyAmount @Model.ExchangeFromCurrency</div>
-                            <div class="hero-form__input-block-label-text">Max buy: @Model.ExchangeMaxAmount @Model.ExchangeToCurrency Buy at @Model.BuyAt </div>
-                        </div>
-                        <div class="hero-form__combined-inputs">
-                            <div class="hero-form__text-input-holder">
-                                <input asp-for="ExchangeToCurrencyAmount" id="txtDeposit" type="text" pattern="[0-9,]+" value="@String.Format("{0:0.##}", Model.ExchangeToCurrencyAmount)" aria-label="Buy" class="bem-text-input in-hero-form-big-enter-amount w-input" maxlength="7">
-                            </div>
-                            <div class="hero-form__dropdown-holder clearfix">
-                                <div class="bem-select-dropdown ">
-                                    <div id="divDeposit" class="hero-form__currency-flag icon-currency-round-@Model.ExchangeToCurrency icon-currency-round-@Model.ExchangeToCurrency-dims" style="margin-left: 5px;"></div>
-                                    <select asp-for="ExchangeToCurrency" name="ExchangeToCurrency" class="form-select" style="height: 47px;width: 105px;text-align: right;font-weight: bold;">
-                                        <option selected="selected" value="@Model.ExchangeToCurrency">@Model.ExchangeToCurrency</option>
-                                    </select>
-                                </div>
-                            </div>
-                            @Html.HiddenFor(model => model.ExchangeFromCurrency)
-                            @Html.HiddenFor(model => model.ExchangeFromCurrencyAmount)
-                            @Html.HiddenFor(model => model.BuyAt)
-                            @Html.HiddenFor(model => model.ExchangeMaxAmount)
-                            <div>
-                                <input id="depositButton" type="submit" value="Buy" class="btn btn-outline-secondary btn-sm align-text-bottom" style="height: 47px;width: 120px; font-weight: bold; margin-left: 80px; background-color: #6775f3; border-color: #6775f3;" />
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
+<section class="trade-shell"
+         data-quote-shell
+         data-quote-mode="buy"
+         data-quote-locked-until="@Model.QuoteLockedUntilUtc.ToString("O")">
+    <div class="page-head">
+        <div>
+            <span class="page-head__eyebrow">Quick Exchange</span>
+            <h1>Buy @Model.TargetCurrencyCode with a locked quote</h1>
+            <p>Rate stays reserved for 30 seconds, with fee and final wallet impact shown before confirmation.</p>
+        </div>
+        <div class="page-head__summary">
+            <div class="page-pill">
+                <span>PLN balance</span>
+                <strong>@Model.SourceBalance.ToString("0.00") PLN</strong>
+            </div>
+            <div class="page-pill">
+                <span>Desk liquidity</span>
+                <strong>@Model.TargetLiquidityAvailable.ToString("0.####") @Model.TargetCurrencyCode</strong>
             </div>
         </div>
     </div>
-</form>
 
-@if (ViewData["errorMessage"] != null)
-{
-    <div style="border: 1px solid #6775f3; color: black; padding: 20px;">
-        <h4>@ViewData["errorMessage"]</h4>
-        Your current saldo: @ViewData["currentBalance"]
+    <div class="trade-grid">
+        <form asp-action="Buy" method="post" class="dashboard-card trade-form">
+            <div class="dashboard-card__head">
+                <div>
+                    <span class="page-head__eyebrow">Quote Builder</span>
+                    <h2>Choose receive amount</h2>
+                </div>
+                <div class="trade-lock @(Model.QuoteExpired ? "trade-lock--expired" : string.Empty)">
+                    <i class="ri-timer-line"></i>
+                    <span data-quote-countdown>30s left</span>
+                </div>
+            </div>
+
+            <div class="trade-input-group">
+                <label asp-for="RequestedAmount">You want to receive</label>
+                <div class="trade-input-with-code">
+                    <input asp-for="RequestedAmount"
+                           type="number"
+                           min="0"
+                           max="@Model.MaxAmount"
+                           step="0.0001"
+                           class="form-control form-control-lg"
+                           data-quote-amount />
+                    <span>@Model.TargetCurrencyCode</span>
+                </div>
+                <small>Maximum available now: @Model.MaxAmount.ToString("0.####") @Model.TargetCurrencyCode</small>
+            </div>
+
+            <input asp-for="CurrencyId" type="hidden" />
+            <input asp-for="CurrencyName" type="hidden" />
+            <input asp-for="Mode" type="hidden" />
+            <input asp-for="SourceCurrencyCode" type="hidden" />
+            <input asp-for="TargetCurrencyCode" type="hidden" />
+            <input asp-for="SourceBalance" type="hidden" />
+            <input asp-for="TargetBalance" type="hidden" />
+            <input asp-for="MaxAmount" type="hidden" />
+            <input asp-for="Rate" type="hidden" data-quote-rate />
+            <input asp-for="FeeRate" type="hidden" data-quote-fee-rate />
+            <input asp-for="GrossValue" type="hidden" data-quote-gross-input />
+            <input asp-for="FeeAmount" type="hidden" data-quote-fee-input />
+            <input asp-for="NetValue" type="hidden" data-quote-net-input />
+            <input asp-for="TargetLiquidityAvailable" type="hidden" />
+            <input asp-for="QuoteLockedUntilUtc" type="hidden" />
+
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="trade-alert">
+                    <i class="ri-error-warning-line"></i>
+                    <span>@Model.ErrorMessage</span>
+                </div>
+            }
+
+            <div class="trade-actions">
+                <button type="submit" class="app-btn app-btn--primary" data-quote-submit>Confirm buy</button>
+                <a class="app-btn app-btn--ghost" asp-action="Index">Back to board</a>
+            </div>
+        </form>
+
+        <aside class="dashboard-card trade-summary">
+            <div class="dashboard-card__head">
+                <div>
+                    <span class="page-head__eyebrow">Preview</span>
+                    <h2>Deal impact</h2>
+                </div>
+            </div>
+
+            <dl class="trade-summary__stats">
+                <div>
+                    <dt>Locked rate</dt>
+                    <dd data-quote-rate-output>@Model.Rate.ToString("0.0000")</dd>
+                </div>
+                <div>
+                    <dt>Gross cost</dt>
+                    <dd><span data-quote-gross>@Model.GrossValue.ToString("0.00")</span> PLN</dd>
+                </div>
+                <div>
+                    <dt>Desk fee</dt>
+                    <dd><span data-quote-fee>@Model.FeeAmount.ToString("0.00")</span> PLN</dd>
+                </div>
+                <div>
+                    <dt>Total debit</dt>
+                    <dd><span data-quote-net>@Model.NetValue.ToString("0.00")</span> PLN</dd>
+                </div>
+            </dl>
+
+            <div class="trade-summary__foot">
+                <p>Fee rate: @(Model.FeeRate * 100m).ToString("0.##")%</p>
+                <p>Current @Model.TargetCurrencyCode wallet balance: @Model.TargetBalance.ToString("0.####")</p>
+            </div>
+        </aside>
     </div>
-}
+</section>

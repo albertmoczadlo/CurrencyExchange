@@ -13,7 +13,7 @@ namespace VistulaExchange.Services.Services.Service
         private readonly INbpJsonService _nbpJsonService;
         private readonly ITransactionHistoryService _transactionHistoryService;
 
-        public MenuService(IUserService userService, IUserWalletRepository userWalletRepository, IExchangeOfficeBoardService exchangeOfficeBoardSevice, IAvailableMoneyOnStockRepository availableMoneyOnStock, INbpJsonService nbpJsonService, ITransactionHistoryService transactionHistoryService)
+        public MenuService(IUserService userService, IUserWalletRepository userWalletRepository, IExchangeOfficeBoardService exchangeOfficeBoardSevice, IAvailableMoneyOnStockService availableMoneyOnStockService, INbpJsonService nbpJsonService, ITransactionHistoryService transactionHistoryService)
 
         {
             _userService = userService;
@@ -21,7 +21,7 @@ namespace VistulaExchange.Services.Services.Service
             _exchangeOfficeBoardSevice = exchangeOfficeBoardSevice;
             _transactionHistoryService = transactionHistoryService;
             _menuUserActions = new MenuRoleUserService(_userService, userWalletRepository, _exchangeOfficeBoardSevice, _transactionHistoryService);
-            _menuAdminActions = new MenuRoleAdminService(_userService, _exchangeOfficeBoardSevice, availableMoneyOnStock, _nbpJsonService, _transactionHistoryService);
+            _menuAdminActions = new MenuRoleAdminService(_userService, _exchangeOfficeBoardSevice, availableMoneyOnStockService, _nbpJsonService, _transactionHistoryService);
 
         }
     }

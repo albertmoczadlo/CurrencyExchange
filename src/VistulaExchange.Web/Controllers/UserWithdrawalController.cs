@@ -1,5 +1,5 @@
 using VistulaExchange.Database.Domain;
-using VistulaExchange.Database.Interface;
+using VistulaExchange.Services.Services.Interfaces;
 using VistulaExchange.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -8,17 +8,22 @@ namespace VistulaExchange.Web.Controllers
 {
     public class UserWithdrawalController : Controller
     {
-        private readonly IUserWalletRepository _userWalletkRepository;
+        private readonly IUserWalletService _userWalletService;
 
-        public UserWithdrawalController(IUserWalletRepository userWalletkRepository)
+        public UserWithdrawalController(IUserWalletService userWalletService)
         {
-            _userWalletkRepository = userWalletkRepository;
+            _userWalletService = userWalletService;
         }
-        public IActionResult Index()
+
+        public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Challenge();
+            }
 
-            var userWallet = _userWalletkRepository.GetWallet(userId);
+            var userWallet = await _userWalletService.GetWalletAsync(userId);
             var userWithdrawal = userWallet.WalletPositions.ToList()
                 .Select(a => new UserWithdrawal()
                 {
@@ -29,9 +34,9 @@ namespace VistulaExchange.Web.Controllers
             return View(userWithdrawal);
         }
 
-        public IActionResult WithdrawalIndex(string currency)
+        public async Task<IActionResult> WithdrawalIndex(string currency)
         {
-            var currencyAmount = GetCurrencyBalance(currency);
+            var currencyAmount = await GetCurrencyBalanceAsync(currency);
 
             var userWithdrawal = new UserWithdrawal();
             userWithdrawal.Currency = currency;
@@ -40,9 +45,9 @@ namespace VistulaExchange.Web.Controllers
             return View("Withdrawal", userWithdrawal);
         }
 
-        public IActionResult Withdrawal(UserWithdrawal userWithdrawal)
+        public async Task<IActionResult> Withdrawal(UserWithdrawal userWithdrawal)
         {
-            var currentBalance = GetCurrencyBalance(userWithdrawal.Currency);
+            var currentBalance = await GetCurrencyBalanceAsync(userWithdrawal.Currency);
 
             if (userWithdrawal.Amount > currentBalance.CurrencyAmount)
             {
@@ -53,10 +58,14 @@ namespace VistulaExchange.Web.Controllers
             // Check balance after withdrawal
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Challenge();
+            }
 
-            _userWalletkRepository.Withdrawal(userId, userWithdrawal.Currency, userWithdrawal.Amount, "Withdrawal");
+            await _userWalletService.WithdrawalAsync(userId, userWithdrawal.Currency, userWithdrawal.Amount, "Withdrawal");
 
-            var newBalance = GetCurrencyBalance(userWithdrawal.Currency);
+            var newBalance = await GetCurrencyBalanceAsync(userWithdrawal.Currency);
             ViewData["currentSaldo"] = newBalance.CurrencyAmount;
             ViewData["currenncy"] = userWithdrawal.Currency;
             ViewData["activePage"] = "UserWithdrawal";
@@ -64,12 +73,16 @@ namespace VistulaExchange.Web.Controllers
             return View("WithdrawalCompleted");
         }
 
-        private WalletPosition GetCurrencyBalance(string currency)
+        private async Task<WalletPosition> GetCurrencyBalanceAsync(string currency)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var wallet = _userWalletkRepository.GetWallet(userId);
-            var currencyAmount = wallet.WalletPositions.Where(a => a.Currency.ShortName == currency).Single();
-            return currencyAmount;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return new WalletPosition();
+            }
+
+            var currencyAmount = await _userWalletService.GetCurrencyBalanceByCodeAsync(userId, currency);
+            return currencyAmount ?? new WalletPosition();
         }
     }
 }

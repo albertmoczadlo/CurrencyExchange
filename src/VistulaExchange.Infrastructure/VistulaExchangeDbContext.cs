@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using VistulaExchange.Database.Domain;
 
 
-namespace VistulaExchange.Web.Areas.Identity.Data;
+namespace VistulaExchange.Infrastructure.Persistence;
 
 public class VistulaExchangeDbContext : IdentityDbContext<User>
 {

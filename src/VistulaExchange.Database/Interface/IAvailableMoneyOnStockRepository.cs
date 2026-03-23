@@ -4,9 +4,9 @@ namespace VistulaExchange.Database.Interface
 {
     public interface IAvailableMoneyOnStockRepository
     {
-        void AddMoneyToStock(MoneyOnStock moneyOnStock);
-        List<MoneyOnStock> GetAvailableMoneyOnStock();
-        string SubtractMoneyFromStock(MoneyOnStock moneyOnStock);
+        Task AddMoneyToStockAsync(MoneyOnStock moneyOnStock);
+        Task<List<MoneyOnStock>> GetAvailableMoneyOnStockAsync();
+        Task<string> SubtractMoneyFromStockAsync(MoneyOnStock moneyOnStock);
     }
 
 }

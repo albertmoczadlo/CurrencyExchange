@@ -17,6 +17,31 @@ namespace VistulaExchange.Services.Services.Service
             _emailSender = emailSender;
         }
 
+        public Task<List<UserAlarm>> GetUserAlarmsAsync(string userId)
+        {
+            return _userAlarmRepository.GetUserAlarmsAsync(userId);
+        }
+
+        public Task<UserAlarm> GetUserAlarmAsync(string alarmId)
+        {
+            return _userAlarmRepository.GetUserAlarmAsync(alarmId);
+        }
+
+        public Task AddUserAlarmAsync(UserAlarm alarm)
+        {
+            return _userAlarmRepository.AddUserAlarmAsync(alarm);
+        }
+
+        public Task EditUserAlarmAsync(UserAlarm alarm)
+        {
+            return _userAlarmRepository.EditUserAlarmAsync(alarm);
+        }
+
+        public Task DeleteUserAlarmAsync(string alarmId)
+        {
+            return _userAlarmRepository.DeleteUserAlarmAsync(alarmId);
+        }
+
         public async Task ExecuteAlarmsAsync(List<Currency> currencies)
         {
             var userAlarms = await _userAlarmRepository.GetUserAlarmsAsync();

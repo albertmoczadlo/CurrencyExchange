@@ -1,5 +1,4 @@
 using VistulaExchange.Database.Domain;
-using VistulaExchange.Database.Interface;
 using VistulaExchange.Services.Services.Interfaces;
 using VistulaExchange.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -11,12 +10,12 @@ namespace VistulaExchange.Web.Controllers
     [Authorize]
     public class UserDepositController : Controller
     {
-        private readonly IUserWalletRepository _userWalletRepository;
+        private readonly IUserWalletService _userWalletService;
         private readonly IExchangeOfficeBoardService _exchangeOfficeBoardService;
 
-        public UserDepositController(IUserWalletRepository userWalletRepository, IExchangeOfficeBoardService exchangeOfficeBoardService)
+        public UserDepositController(IUserWalletService userWalletService, IExchangeOfficeBoardService exchangeOfficeBoardService)
         {
-            _userWalletRepository = userWalletRepository;
+            _userWalletService = userWalletService;
             _exchangeOfficeBoardService = exchangeOfficeBoardService;
         }
 
@@ -27,7 +26,7 @@ namespace VistulaExchange.Web.Controllers
             return View();
         }
 
-        public IActionResult Deposit(UserDeposit userDeposit)
+        public async Task<IActionResult> Deposit(UserDeposit userDeposit)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId))
@@ -35,9 +34,9 @@ namespace VistulaExchange.Web.Controllers
                 return Challenge();
             }
 
-            _userWalletRepository.Deposit(userId, userDeposit.Currency, userDeposit.Amount, "Deposit");
+            await _userWalletService.DepositAsync(userId, userDeposit.Currency, userDeposit.Amount, "Deposit");
 
-            var wallet = _userWalletRepository.GetWallet(userId);
+            var wallet = await _userWalletService.GetWalletAsync(userId);
             var currentSaldo = wallet.WalletPositions.SingleOrDefault(a => a.Currency.ShortName == userDeposit.Currency);
 
             ViewData["currentSaldo"] = currentSaldo?.CurrencyAmount ?? 0;

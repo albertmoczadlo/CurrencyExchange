@@ -1,28 +1,28 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Database.Interface;
-using VistulaExchange.Web.Areas.Identity.Data;
+using VistulaExchange.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace VistulaExchange.Database.Repositories
+namespace VistulaExchange.Infrastructure.Repositories
 {
     public class UserWalletRepository : IUserWalletRepository
     {
-        private readonly VistulaExchangeDbContext _jediAppDb;
+        private readonly VistulaExchangeDbContext _dbContext;
 
-        public UserWalletRepository(VistulaExchangeDbContext jediAppDb)
+        public UserWalletRepository(VistulaExchangeDbContext dbContext)
         {
-            _jediAppDb = jediAppDb;
+            _dbContext = dbContext;
         }
 
-        public void Deposit(string userId, string currencyCode, decimal depositAmount, string description)
+        public async Task DepositAsync(string userId, string currencyCode, decimal depositAmount, string description)
         {
-            var userWallet = GetWallet(userId);
+            var userWallet = await GetWalletAsync(userId);
 
             WalletPosition walletCurrency;
-            if (userWallet.WalletPositions != null && userWallet.WalletPositions.Any())
+            if (userWallet.WalletPositions is not null && userWallet.WalletPositions.Any())
             {
-                walletCurrency = userWallet.WalletPositions.FirstOrDefault(cur => cur.Currency.ShortName == currencyCode);
+                walletCurrency = userWallet.WalletPositions
+                    .FirstOrDefault(cur => string.Equals(cur.Currency.ShortName, currencyCode, StringComparison.OrdinalIgnoreCase));
             }
             else
             {
@@ -32,15 +32,15 @@ namespace VistulaExchange.Database.Repositories
 
             if (walletCurrency != null)
             {
-                walletCurrency.CurrencyAmount = walletCurrency.CurrencyAmount + depositAmount;
-                _jediAppDb.Update(walletCurrency);
+                walletCurrency.CurrencyAmount += depositAmount;
+                _dbContext.Update(walletCurrency);
             }
             else
             {
-                var currency = _jediAppDb.Currencys.Single(c => c.ShortName == currencyCode);
+                var currency = await _dbContext.Currencys
+                    .SingleAsync(c => string.Equals(c.ShortName, currencyCode, StringComparison.OrdinalIgnoreCase));
 
-
-                userWallet.WalletPositions.Add(new Database.Domain.WalletPosition()
+                userWallet.WalletPositions.Add(new WalletPosition
                 {
                     CurrencyAmount = depositAmount,
                     CurrencyId = currency.Id
@@ -59,41 +59,50 @@ namespace VistulaExchange.Database.Repositories
 
             if (description != "Sell")
             {
-                _jediAppDb.Add(transactionHistory);
+                await _dbContext.AddAsync(transactionHistory);
             }
 
-            _jediAppDb.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
-        public Wallet GetWallet(string userId)
+        public async Task<Wallet> GetWalletAsync(string userId)
         {
-            var userWalletExists = _jediAppDb.Wallets.Any(a => a.UserId == userId);
+            var userWalletExists = await _dbContext.Wallets.AnyAsync(a => a.UserId == userId);
 
             if (!userWalletExists)
             {
-                _jediAppDb.Wallets.Add(new Database.Domain.Wallet() { UserId = userId });
-                _jediAppDb.SaveChanges();
+                await _dbContext.Wallets.AddAsync(new Wallet { UserId = userId });
+                await _dbContext.SaveChangesAsync();
             }
 
-            return _jediAppDb.Wallets.Include("WalletPositions.Currency").SingleOrDefault(a => a.UserId == userId);
+            return await _dbContext.Wallets
+                .Include(a => a.WalletPositions)
+                .ThenInclude(a => a.Currency)
+                .SingleAsync(a => a.UserId == userId);
         }
 
-        public void Withdrawal(string userId, string currencyCode, decimal withdrawalAmount, string description)
+        public async Task WithdrawalAsync(string userId, string currencyCode, decimal withdrawalAmount, string description)
         {
-            var userWallet = GetWallet(userId);
+            var userWallet = await GetWalletAsync(userId);
 
             WalletPosition walletCurrency;
-            if (userWallet.WalletPositions != null && userWallet.WalletPositions.Any())
+            if (userWallet.WalletPositions is not null && userWallet.WalletPositions.Any())
             {
-                walletCurrency = userWallet.WalletPositions.FirstOrDefault(cur => cur.Currency.ShortName == currencyCode);
+                walletCurrency = userWallet.WalletPositions
+                    .FirstOrDefault(cur => string.Equals(cur.Currency.ShortName, currencyCode, StringComparison.OrdinalIgnoreCase));
             }
             else
             {
                 return;
             }
 
-            walletCurrency.CurrencyAmount = walletCurrency.CurrencyAmount - withdrawalAmount;
-            _jediAppDb.Update(walletCurrency);
+            if (walletCurrency is null)
+            {
+                return;
+            }
+
+            walletCurrency.CurrencyAmount -= withdrawalAmount;
+            _dbContext.Update(walletCurrency);
 
             var transactionHistory = new TransactionHistory
             {
@@ -107,10 +116,10 @@ namespace VistulaExchange.Database.Repositories
 
             if (description != "Buy")
             {
-                _jediAppDb.Add(transactionHistory);
+                await _dbContext.AddAsync(transactionHistory);
             }
 
-            _jediAppDb.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

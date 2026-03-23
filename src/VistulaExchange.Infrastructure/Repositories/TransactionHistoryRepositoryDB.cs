@@ -1,35 +1,42 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Database.Interface;
-using VistulaExchange.Web.Areas.Identity.Data;
+using VistulaExchange.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace VistulaExchange.Database.Repositories
+namespace VistulaExchange.Infrastructure.Repositories
 {
     public class TransactionHistoryRepositoryDB : ITransactionHistoryRepository
     {
-        private readonly VistulaExchangeDbContext _jediAppDb;
+        private readonly VistulaExchangeDbContext _dbContext;
 
-        public TransactionHistoryRepositoryDB(VistulaExchangeDbContext jediAppDb)
+        public TransactionHistoryRepositoryDB(VistulaExchangeDbContext dbContext)
         {
-            _jediAppDb = jediAppDb;
+            _dbContext = dbContext;
         }
-        public bool AddTransaction(TransactionHistory transactionHistory)
+
+        public async Task<bool> AddTransactionAsync(TransactionHistory transactionHistory)
         {
-            _jediAppDb.Add(transactionHistory);
-            _jediAppDb.SaveChanges();
+            await _dbContext.AddAsync(transactionHistory);
+            await _dbContext.SaveChangesAsync();
 
             return true;
         }
 
-        public List<TransactionHistory> GetAllUsersHistories()
+        public Task<List<TransactionHistory>> GetAllUsersHistoriesAsync()
         {
-            return _jediAppDb.TransactionHistory.Include(t => t.User).OrderBy(c => c.DateOfTransaction).ToList();
+            return _dbContext.TransactionHistory
+                .Include(t => t.User)
+                .OrderBy(c => c.DateOfTransaction)
+                .ToListAsync();
         }
 
-        public List<TransactionHistory> GetUserHistoryByUserId(string userId)
+        public Task<List<TransactionHistory>> GetUserHistoryByUserIdAsync(string userId)
         {
-
-            return _jediAppDb.TransactionHistory.Where(x => x.UserId == userId).Include(t => t.User).OrderBy(c => c.DateOfTransaction).ToList();
+            return _dbContext.TransactionHistory
+                .Where(x => x.UserId == userId)
+                .Include(t => t.User)
+                .OrderBy(c => c.DateOfTransaction)
+                .ToListAsync();
         }
     }
 }

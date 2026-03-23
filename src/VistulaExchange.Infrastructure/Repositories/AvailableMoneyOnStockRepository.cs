@@ -1,46 +1,49 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Database.Interface;
-using VistulaExchange.Web.Areas.Identity.Data;
+using VistulaExchange.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
-namespace VistulaExchange.Database.Repositories
+namespace VistulaExchange.Infrastructure.Repositories
 {
     public class AvailableMoneyOnStockRepository : IAvailableMoneyOnStockRepository
     {
-        private readonly VistulaExchangeDbContext _jediAppDb;
+        private readonly VistulaExchangeDbContext _dbContext;
 
-        public AvailableMoneyOnStockRepository(VistulaExchangeDbContext jediAppDb)
+        public AvailableMoneyOnStockRepository(VistulaExchangeDbContext dbContext)
         {
-            _jediAppDb = jediAppDb;
+            _dbContext = dbContext;
         }
 
-        public void AddMoneyToStock(MoneyOnStock moneyOnStock)
+        public async Task AddMoneyToStockAsync(MoneyOnStock moneyOnStock)
         {
-            var office = _jediAppDb.ExchangeOffices.FirstOrDefault();
+            var office = await _dbContext.ExchangeOffices.FirstOrDefaultAsync();
             moneyOnStock.ExchangeOffice = office;
 
-            var currentMoneyOnStockForCurrency = _jediAppDb.MoneyOnStocks.Where(a => a.CurrencyName == moneyOnStock.CurrencyName).SingleOrDefault();
+            var currentMoneyOnStockForCurrency = await _dbContext.MoneyOnStocks
+                .SingleOrDefaultAsync(a => a.CurrencyName == moneyOnStock.CurrencyName);
             if (currentMoneyOnStockForCurrency != null)
             {
-                currentMoneyOnStockForCurrency.Value = currentMoneyOnStockForCurrency.Value + moneyOnStock.Value;
+                currentMoneyOnStockForCurrency.Value += moneyOnStock.Value;
             }
             else
             {
-                _jediAppDb.MoneyOnStocks.Add(moneyOnStock);
+                await _dbContext.MoneyOnStocks.AddAsync(moneyOnStock);
             }
 
-            _jediAppDb.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
-        public string SubtractMoneyFromStock(MoneyOnStock moneyOnStock)
+        public async Task<string> SubtractMoneyFromStockAsync(MoneyOnStock moneyOnStock)
         {
-            var office = _jediAppDb.ExchangeOffices.FirstOrDefault();
+            var office = await _dbContext.ExchangeOffices.FirstOrDefaultAsync();
             moneyOnStock.ExchangeOffice = office;
 
-            var currentMoneyOnStockForCurrency = _jediAppDb.MoneyOnStocks.Where(a => a.CurrencyName == moneyOnStock.CurrencyName).SingleOrDefault();
+            var currentMoneyOnStockForCurrency = await _dbContext.MoneyOnStocks
+                .SingleOrDefaultAsync(a => a.CurrencyName == moneyOnStock.CurrencyName);
 
             if (currentMoneyOnStockForCurrency != null)
             {
-                currentMoneyOnStockForCurrency.Value = currentMoneyOnStockForCurrency.Value - moneyOnStock.Value;
+                currentMoneyOnStockForCurrency.Value -= moneyOnStock.Value;
                 if (currentMoneyOnStockForCurrency.Value < 0)
                 {
                     return "Not enough money in the account.";
@@ -51,15 +54,15 @@ namespace VistulaExchange.Database.Repositories
                 return "No money found for this currency.";
             }
 
-            _jediAppDb.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return " ";
         }
 
 
-        public List<MoneyOnStock> GetAvailableMoneyOnStock()
+        public Task<List<MoneyOnStock>> GetAvailableMoneyOnStockAsync()
         {
-            return _jediAppDb.MoneyOnStocks.ToList();
+            return _dbContext.MoneyOnStocks.ToListAsync();
         }
 
     }

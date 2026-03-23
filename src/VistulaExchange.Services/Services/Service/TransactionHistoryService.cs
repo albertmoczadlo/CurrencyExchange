@@ -13,19 +13,19 @@ namespace VistulaExchange.Services.Services.Service
             _transactionHistoryRepository = transactionHistoryRepository;
         }
 
-        public bool AddTransaction(TransactionHistory transactionHistory)
+        public Task<bool> AddTransactionAsync(TransactionHistory transactionHistory)
         {
-            return _transactionHistoryRepository.AddTransaction(transactionHistory);
-        }
-        public List<TransactionHistory> GetUserHistoryByUserId(string userId)
-        {
-            return _transactionHistoryRepository.GetUserHistoryByUserId(userId);
+            return _transactionHistoryRepository.AddTransactionAsync(transactionHistory);
         }
 
-        public List<TransactionHistory> GetAllUsersHistories()
+        public Task<List<TransactionHistory>> GetUserHistoryByUserIdAsync(string userId)
         {
-            return _transactionHistoryRepository.GetAllUsersHistories();
+            return _transactionHistoryRepository.GetUserHistoryByUserIdAsync(userId);
         }
 
+        public Task<List<TransactionHistory>> GetAllUsersHistoriesAsync()
+        {
+            return _transactionHistoryRepository.GetAllUsersHistoriesAsync();
+        }
     }
 }
