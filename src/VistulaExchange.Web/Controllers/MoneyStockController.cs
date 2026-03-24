@@ -1,10 +1,12 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Services.Services.Interfaces;
 using VistulaExchange.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace VistulaExchange.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class MoneyStockController : Controller
     {
         private readonly IAvailableMoneyOnStockService _availableMoneyOnStockService;
@@ -49,7 +51,7 @@ namespace VistulaExchange.Web.Controllers
             var currentSaldo = moneyOnStock.SingleOrDefault(a => a.CurrencyName == adminDeposit.Currency);
 
             ViewData["currentSaldo"] = currentSaldo?.Value ?? 0;
-            ViewData["currenncy"] = adminDeposit.Currency;
+            ViewData["currency"] = adminDeposit.Currency;
             ViewData["activePage"] = "MoneyStock";
 
             return View("DepositCompleted");

@@ -1,10 +1,12 @@
 using iText.Html2pdf;
 using VistulaExchange.Services.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace VistulaExchange.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminTransactionHistoryController : Controller
     {
         private readonly ITransactionHistoryService _transactionHistoryService;

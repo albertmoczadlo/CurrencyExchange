@@ -26,6 +26,8 @@ namespace VistulaExchange.Web.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Deposit(UserDeposit userDeposit)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -40,7 +42,7 @@ namespace VistulaExchange.Web.Controllers
             var currentSaldo = wallet.WalletPositions.SingleOrDefault(a => a.Currency.ShortName == userDeposit.Currency);
 
             ViewData["currentSaldo"] = currentSaldo?.CurrencyAmount ?? 0;
-            ViewData["currenncy"] = userDeposit.Currency;
+            ViewData["currency"] = userDeposit.Currency;
             ViewData["activePage"] = "UserDeposit";
 
             return View("DepositCompleted");

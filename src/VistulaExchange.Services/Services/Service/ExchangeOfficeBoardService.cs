@@ -41,9 +41,9 @@ namespace VistulaExchange.Services.Services.Service
 
         public bool UpdateCurrency(Guid id, Currency currencyToEdit)
         {
-            var currnecy = GetAllCurrencies().FirstOrDefault(c => c.Id == id);
+            var currency = GetAllCurrencies().FirstOrDefault(c => c.Id == id);
 
-            if (currnecy == null)
+            if (currency == null)
             {
                 return false;
             }
@@ -52,13 +52,13 @@ namespace VistulaExchange.Services.Services.Service
 
         public bool DeleteCurrencyByShortName(string shortName)
         {
-            var currnecy = GetAllCurrencies().FirstOrDefault(c => c.ShortName.ToLowerInvariant().Equals(shortName.ToLowerInvariant()));
+            var currency = GetAllCurrencies().FirstOrDefault(c => c.ShortName.ToLowerInvariant().Equals(shortName.ToLowerInvariant()));
 
-            if (currnecy == null)
+            if (currency == null)
             {
                 return false;
             }
-            return _exchangeOfficeBoardRepository.DeleteCurrency(currnecy.Id);
+            return _exchangeOfficeBoardRepository.DeleteCurrency(currency.Id);
         }
 
         public bool IfShortNameIsUnique(Currency currency)

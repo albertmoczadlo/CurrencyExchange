@@ -6,17 +6,17 @@ namespace VistulaExchange.Infrastructure.Repositories
 {
     public class ExchangeOfficeRepositoryDB : IExchangeOfficeRepository
     {
-        private readonly VistulaExchangeDbContext _jediAppDb;
+        private readonly VistulaExchangeDbContext _dbContext;
 
-        public ExchangeOfficeRepositoryDB(VistulaExchangeDbContext jediAppDb)
+        public ExchangeOfficeRepositoryDB(VistulaExchangeDbContext dbContext)
         {
-            _jediAppDb = jediAppDb;
+            _dbContext = dbContext;
         }
 
         public List<ExchangeOffice> GetAllExchangeOffices()
         {
 
-            return _jediAppDb.ExchangeOffices.OrderBy(c => c.Name).ToList();
+            return _dbContext.ExchangeOffices.OrderBy(c => c.Name).ToList();
 
         }
 
@@ -38,11 +38,11 @@ namespace VistulaExchange.Infrastructure.Repositories
                 exchangeOffice.Address = exchangeOfficeToEdit.Address;
                 exchangeOffice.Markup = exchangeOfficeToEdit.Markup;
 
-                //_jediAppDb.SaveChangesAsync();
-                _jediAppDb.SaveChanges();
+                _dbContext.SaveChanges();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.Error.WriteLine($"[ExchangeOfficeRepository] UpdateExchangeOffice failed for id={id}: {ex}");
                 return false;
             }
             return true;

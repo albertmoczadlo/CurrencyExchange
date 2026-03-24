@@ -6,18 +6,18 @@ namespace VistulaExchange.Infrastructure.Repositories
 {
     public class ExchangeOfficeBoardRepositoryDB : IExchangeOfficeBoardRepository
     {
-        private readonly VistulaExchangeDbContext _jediAppDb;
+        private readonly VistulaExchangeDbContext _dbContext;
 
-        public ExchangeOfficeBoardRepositoryDB(VistulaExchangeDbContext jediAppDb)
+        public ExchangeOfficeBoardRepositoryDB(VistulaExchangeDbContext dbContext)
         {
-            _jediAppDb = jediAppDb;
+            _dbContext = dbContext;
         }
 
         public Currency AddCurrency(Currency currency)
         {
-            currency.ExchangeOfficeBoardId = _jediAppDb.ExchangeOfficeBoards.FirstOrDefault().Id;
+            currency.ExchangeOfficeBoardId = _dbContext.ExchangeOfficeBoards.FirstOrDefault().Id;
 
-            var currecyDic = _jediAppDb.CurrencyDictionaries.Where(cd => cd.ShortName.ToLower().Equals(currency.ShortName.ToLower())).FirstOrDefault();
+            var currecyDic = _dbContext.CurrencyDictionaries.Where(cd => cd.ShortName.ToLower().Equals(currency.ShortName.ToLower())).FirstOrDefault();
             if(currecyDic != null)
             {
                 currency.Name = currecyDic.Name;
@@ -25,8 +25,8 @@ namespace VistulaExchange.Infrastructure.Repositories
                 currency.Country = currecyDic.Country;
             }
 
-            _jediAppDb.Add(currency);
-            _jediAppDb.SaveChanges();
+            _dbContext.Add(currency);
+            _dbContext.SaveChanges();
 
             return currency;
 
@@ -34,19 +34,19 @@ namespace VistulaExchange.Infrastructure.Repositories
 
         public Currency UpdateCurrency(Currency currency)
         {
-            var currencyFromDb = _jediAppDb.Currencys.Where(c => c.ShortName == currency.ShortName).FirstOrDefault();
+            var currencyFromDb = _dbContext.Currencys.Where(c => c.ShortName == currency.ShortName).FirstOrDefault();
             currencyFromDb.SellAt = currency.SellAt;
             currencyFromDb.BuyAt = currency.BuyAt;
 
-            _jediAppDb.Update(currencyFromDb);
-            _jediAppDb.SaveChanges();
+            _dbContext.Update(currencyFromDb);
+            _dbContext.SaveChanges();
 
             return currencyFromDb;
         }
 
         public List<Currency> GetAllCurrencies()
         {
-            var office = _jediAppDb.ExchangeOffices.FirstOrDefault();
+            var office = _dbContext.ExchangeOffices.FirstOrDefault();
             if (office is null)
             {
                 office = new ExchangeOffice
@@ -57,20 +57,20 @@ namespace VistulaExchange.Infrastructure.Repositories
                     Markup = 5
                 };
 
-                _jediAppDb.Add(office);
-                _jediAppDb.SaveChanges();
+                _dbContext.Add(office);
+                _dbContext.SaveChanges();
             }
 
-            var officeBoard = _jediAppDb.ExchangeOfficeBoards.FirstOrDefault();
+            var officeBoard = _dbContext.ExchangeOfficeBoards.FirstOrDefault();
             if(officeBoard is null)
             {
                 officeBoard = new ExchangeOfficeBoard { Id = Guid.NewGuid(), ExchangeOfficeId = office.Id };
-                _jediAppDb.Add(officeBoard);
-                _jediAppDb.SaveChanges();
+                _dbContext.Add(officeBoard);
+                _dbContext.SaveChanges();
 
             }
 
-            var pln = _jediAppDb.Currencys.Where(c => (c.ShortName.ToLower()).Equals("pln")).FirstOrDefault();
+            var pln = _dbContext.Currencys.Where(c => (c.ShortName.ToLower()).Equals("pln")).FirstOrDefault();
             if (pln is null)
             {
                 pln = new Currency
@@ -81,13 +81,13 @@ namespace VistulaExchange.Infrastructure.Repositories
                     Country = "Poland",
                     BuyAt = 1,
                     SellAt = 1,
-                    ExchangeOfficeBoardId = _jediAppDb.ExchangeOfficeBoards.FirstOrDefault().Id
+                    ExchangeOfficeBoardId = _dbContext.ExchangeOfficeBoards.FirstOrDefault().Id
                 };
-                _jediAppDb.Add(pln);
+                _dbContext.Add(pln);
             }
-            _jediAppDb.SaveChanges();
+            _dbContext.SaveChanges();
 
-            return _jediAppDb.Currencys.OrderBy(c => c.ShortName).ToList();
+            return _dbContext.Currencys.OrderBy(c => c.ShortName).ToList();
 
         }
 
@@ -109,7 +109,6 @@ namespace VistulaExchange.Infrastructure.Repositories
 
         public bool UpdateCurrency(Guid id, Currency currencyToEdit)
         {
-
             try
             {
                 var currency = GetCurrencyById(id);
@@ -120,10 +119,11 @@ namespace VistulaExchange.Infrastructure.Repositories
                 currency.BuyAt = currencyToEdit.BuyAt;
                 currency.SellAt = currencyToEdit.SellAt;
 
-                _jediAppDb.SaveChanges();
+                _dbContext.SaveChanges();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.Error.WriteLine($"[ExchangeOfficeBoardRepository] UpdateCurrency failed for id={id}: {ex}");
                 return false;
             }
             return true;
@@ -134,12 +134,12 @@ namespace VistulaExchange.Infrastructure.Repositories
             try
             {
                 var currency = GetCurrencyById(id);
-                _jediAppDb.Remove(currency);
-                _jediAppDb.SaveChanges();
-
+                _dbContext.Remove(currency);
+                _dbContext.SaveChanges();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.Error.WriteLine($"[ExchangeOfficeBoardRepository] DeleteCurrency failed for id={id}: {ex}");
                 return false;
             }
             return true;

@@ -1,11 +1,14 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Services.Services.Interfaces;
 using VistulaExchange.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace VistulaExchange.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ExchangeOfficeBoardController : Controller
     {
         private readonly IExchangeOfficeBoardService _exchangeOfficeBoardService;
@@ -169,9 +172,9 @@ namespace VistulaExchange.Web.Controllers
                     }
 
                 }
-                catch
+                catch (Exception ex)
                 {
-                    //pln
+                    Console.Error.WriteLine($"[ExchangeOfficeBoardController] Failed to update currency {currency.ShortName}: {ex.Message}");
                 }
 
             }

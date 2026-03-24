@@ -67,7 +67,7 @@ namespace VistulaExchange.Web.Controllers
 
             var newBalance = await GetCurrencyBalanceAsync(userWithdrawal.Currency);
             ViewData["currentSaldo"] = newBalance.CurrencyAmount;
-            ViewData["currenncy"] = userWithdrawal.Currency;
+            ViewData["currency"] = userWithdrawal.Currency;
             ViewData["activePage"] = "UserWithdrawal";
 
             return View("WithdrawalCompleted");

@@ -1,9 +1,11 @@
 using VistulaExchange.Database.Domain;
 using VistulaExchange.Services.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace VistulaExchange.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly IUserService _userService;

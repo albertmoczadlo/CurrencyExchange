@@ -1,9 +1,11 @@
 using iText.Html2pdf;
 using VistulaExchange.Services.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace VistulaExchange.Web.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminReportController : Controller
     {
         private readonly IAdminDashboardService _adminDashboardService;

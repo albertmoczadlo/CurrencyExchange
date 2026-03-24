@@ -57,11 +57,7 @@ namespace VistulaExchange.Infrastructure.Repositories
                 Description = description
             };
 
-            if (description != "Sell")
-            {
-                await _dbContext.AddAsync(transactionHistory);
-            }
-
+            await _dbContext.AddAsync(transactionHistory);
             await _dbContext.SaveChangesAsync();
         }
 
@@ -114,11 +110,7 @@ namespace VistulaExchange.Infrastructure.Repositories
                 Description = description
             };
 
-            if (description != "Buy")
-            {
-                await _dbContext.AddAsync(transactionHistory);
-            }
-
+            await _dbContext.AddAsync(transactionHistory);
             await _dbContext.SaveChangesAsync();
         }
     }

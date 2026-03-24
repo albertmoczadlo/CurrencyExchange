@@ -7,36 +7,40 @@ namespace VistulaExchange.Infrastructure.Repositories
 {
     public class UserAlarmRepository : IUserAlarmsRepository
     {
-        private readonly VistulaExchangeDbContext _jediAppDb;
+        private readonly VistulaExchangeDbContext _dbContext;
 
-        public UserAlarmRepository(VistulaExchangeDbContext jediAppDb)
+        public UserAlarmRepository(VistulaExchangeDbContext dbContext)
         {
-            _jediAppDb = jediAppDb;
+            _dbContext = dbContext;
         }
 
         public async Task AddUserAlarmAsync(UserAlarm alarm)
         {
-            await _jediAppDb.UserAlarms.AddAsync(alarm);
-            await _jediAppDb.SaveChangesAsync();
+            await _dbContext.UserAlarms.AddAsync(alarm);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteUserAlarmAsync(string alarmId)
         {
-            var alarmIdGuid = Guid.Parse(alarmId);
-            var alarm = await _jediAppDb.UserAlarms.SingleOrDefaultAsync(a => a.Id == alarmIdGuid);
+            if (!Guid.TryParse(alarmId, out var alarmIdGuid))
+            {
+                return;
+            }
+
+            var alarm = await _dbContext.UserAlarms.SingleOrDefaultAsync(a => a.Id == alarmIdGuid);
 
             if (alarm is null)
             {
                 return;
             }
 
-            _jediAppDb.Remove(alarm);
-            await _jediAppDb.SaveChangesAsync();
+            _dbContext.Remove(alarm);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task EditUserAlarmAsync(UserAlarm alarm)
         {
-            var alarmUpdated = await _jediAppDb.UserAlarms.SingleOrDefaultAsync(a => a.Id == alarm.Id);
+            var alarmUpdated = await _dbContext.UserAlarms.SingleOrDefaultAsync(a => a.Id == alarm.Id);
 
             if (alarmUpdated is null)
             {
@@ -48,25 +52,29 @@ namespace VistulaExchange.Infrastructure.Repositories
             alarmUpdated.ShortName = alarm.ShortName;
             alarmUpdated.CurrencyName = alarm.CurrencyName;
 
-            await _jediAppDb.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<UserAlarm> GetUserAlarmAsync(string alarmId)
         {
-            var alarmIdGuid = Guid.Parse(alarmId);
-            return await _jediAppDb.UserAlarms.SingleOrDefaultAsync(a => a.Id == alarmIdGuid);
+            if (!Guid.TryParse(alarmId, out var alarmIdGuid))
+            {
+                return null;
+            }
+
+            return await _dbContext.UserAlarms.SingleOrDefaultAsync(a => a.Id == alarmIdGuid);
         }
 
         public async Task<List<UserAlarm>> GetUserAlarmsAsync()
         {
-            return await _jediAppDb.UserAlarms
+            return await _dbContext.UserAlarms
                 .Include(a => a.User)
                 .ToListAsync();
         }
 
         public async Task<List<UserAlarm>> GetUserAlarmsAsync(string userId)
         {
-            return await _jediAppDb.UserAlarms
+            return await _dbContext.UserAlarms
                 .Where(a => a.UserId == userId)
                 .ToListAsync();
         }
